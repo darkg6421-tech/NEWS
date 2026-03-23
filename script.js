@@ -23,7 +23,13 @@ div.className = "card";
 
 div.innerHTML = `
   <img src="${item.thumbnail || ''}" onerror="this.remove()">
+
   <h3><a href="${item.link}" target="_blank">${item.title}</a></h3>
+
+  <p style="font-size:13px; opacity:0.8;">
+    ${(item.description || "").replace(/<[^>]+>/g, "").slice(0, 120)}...
+  </p>
+
   <p style="font-size:12px; opacity:0.6;">${date}</p>
 `;
 if (count < 3) {
