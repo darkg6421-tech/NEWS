@@ -78,7 +78,12 @@ button:active {
 <body>
 
 <h1>Latest News</h1>
-
+<div style="display:flex; gap:10px; justify-content:center; margin:10px 0;">
+  <button onclick="setCategory('all')">All</button>
+  <button onclick="setCategory('india')">India</button>
+  <button onclick="setCategory('defence')">Defence</button>
+  <button onclick="setCategory('world')">World</button>
+</div>
 <button onclick="fetchNews()">🔄 Refresh</button>
 <p id="last"></p>
 
