@@ -30,4 +30,4 @@ document.getElementById("last").innerText =
 }
 
 fetchNews();
-setInterval(fetchNews, 5000);
+setInterval(fetchNews, 300000);
