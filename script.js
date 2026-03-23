@@ -19,7 +19,8 @@ async function fetchNews() {
 
       container.appendChild(div);
     });
-
+document.getElementById("last").innerText =
+  "Last updated: " + new Date().toLocaleTimeString();
   } catch (e) {
     document.getElementById("news").innerHTML = "Error loading news";
   }
