@@ -13,7 +13,7 @@ async function fetchNews() {
       const div = document.createElement("div");
 
       div.innerHTML = `
-  <img src="${item.thumbnail}" style="width:100%; height:180px; object-fit:cover;" onerror="this.style.display='none'">
+  <img src="${item.thumbnail || ''}" style="width:100%; height:180px; object-fit:cover;" onerror="this.remove()">
   <h3><a href="${item.link}" target="_blank">${item.title}</a></h3>
   <hr/>
 `;
