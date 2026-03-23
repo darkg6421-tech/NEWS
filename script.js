@@ -1,3 +1,9 @@
+let currentCategory = "all";
+
+function setCategory(cat) {
+  currentCategory = cat;
+  fetchNews();
+}
 async function fetchNews() {
   try {
     const res = await fetch(
@@ -14,7 +20,21 @@ let count = 0;
 data.items.forEach(item => {
   const title = item.title.toLowerCase();
 
-  const isRelevant = keywords.some(k => title.includes(k));
+  let isRelevant = keywords.some(k => title.includes(k));
+
+if (currentCategory === "india") {
+  isRelevant = title.includes("india");
+}
+
+if (currentCategory === "defence") {
+  isRelevant = title.includes("army") || title.includes("defence");
+}
+
+if (currentCategory === "world") {
+  isRelevant = title.includes("world") || title.includes("international");
+}
+
+if (!isRelevant) return;
 
   if (!isRelevant) return;
       const div = document.createElement("div");
