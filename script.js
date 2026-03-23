@@ -9,7 +9,14 @@ async function fetchNews() {
     const container = document.getElementById("news");
     container.innerHTML = "";
 
-    data.items.slice(0, 10).forEach(item => {
+    const keywords = ["defence", "army", "nda", "government", "education", "policy", "india", "international"];
+
+data.items.forEach(item => {
+  const title = item.title.toLowerCase();
+
+  const isRelevant = keywords.some(k => title.includes(k));
+
+  if (!isRelevant) return;
       const div = document.createElement("div");
 div.className = "card";
       const date = new Date(item.pubDate).toLocaleString();
