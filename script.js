@@ -10,7 +10,7 @@ async function fetchNews() {
     container.innerHTML = "";
 
     const keywords = ["defence", "army", "nda", "government", "education", "policy", "india", "international"];
-
+let count = 0;
 data.items.forEach(item => {
   const title = item.title.toLowerCase();
 
@@ -26,7 +26,16 @@ div.innerHTML = `
   <h3><a href="${item.link}" target="_blank">${item.title}</a></h3>
   <p style="font-size:12px; opacity:0.6;">${date}</p>
 `;
+if (count < 3) {
+  div.style.border = "2px solid #38bdf8";
+  div.style.background = "#1e3a5f";
 
+  div.innerHTML = `
+    <p style="color:#38bdf8; font-size:12px;">🔥 Important</p>
+  ` + div.innerHTML;
+
+  count++;
+}
       container.appendChild(div);
     });
 document.getElementById("last").innerText =
