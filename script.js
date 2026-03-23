@@ -13,9 +13,10 @@ async function fetchNews() {
       const div = document.createElement("div");
 
       div.innerHTML = `
-        <h3><a href="${item.link}" target="_blank">${item.title}</a></h3>
-        <hr/>
-      `;
+  <img src="${item.thumbnail || 'https://via.placeholder.com/300'}" width="100%">
+  <h3><a href="${item.link}" target="_blank">${item.title}</a></h3>
+  <hr/>
+`;
 
       container.appendChild(div);
     });
