@@ -13,7 +13,7 @@ async function fetchNews() {
       const div = document.createElement("div");
 
       div.innerHTML = `
-  <img src="${item.thumbnail}" style="width:100%; height:180px; object-fit:cover;" onerror="this.onerror=null; this.src='https://via.placeholder.com/300x180?text=No+Image';">
+  <img src="${item.thumbnail}" style="width:100%; height:180px; object-fit:cover;" onerror="this.style.display='none'">
   <h3><a href="${item.link}" target="_blank">${item.title}</a></h3>
   <hr/>
 `;
