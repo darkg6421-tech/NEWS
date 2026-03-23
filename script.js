@@ -12,10 +12,12 @@ async function fetchNews() {
     data.items.slice(0, 10).forEach(item => {
       const div = document.createElement("div");
 div.className = "card";
-      div.innerHTML = `
-  <img src="${item.thumbnail || ''}" style="width:100%; height:180px; object-fit:cover;" onerror="this.remove()">
+      const date = new Date(item.pubDate).toLocaleString();
+
+div.innerHTML = `
+  <img src="${item.thumbnail || ''}" onerror="this.remove()">
   <h3><a href="${item.link}" target="_blank">${item.title}</a></h3>
-  <hr/>
+  <p style="font-size:12px; opacity:0.6;">${date}</p>
 `;
 
       container.appendChild(div);
