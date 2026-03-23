@@ -20,23 +20,35 @@ let count = 0;
 data.items.forEach(item => {
   const title = item.title.toLowerCase();
 
-  let isRelevant = keywords.some(k => title.includes(k));
+  let isRelevant = false;
 
+// ALL
+if (currentCategory === "all") {
+  isRelevant = keywords.some(k => title.includes(k));
+}
+
+// INDIA
 if (currentCategory === "india") {
   isRelevant = title.includes("india");
 }
 
+// DEFENCE
 if (currentCategory === "defence") {
-  isRelevant = title.includes("army") || title.includes("defence");
+  isRelevant = title.includes("army") 
+            || title.includes("defence") 
+            || title.includes("military") 
+            || title.includes("war");
 }
 
+// WORLD
 if (currentCategory === "world") {
-  isRelevant = title.includes("world") || title.includes("international");
+  isRelevant = title.includes("world") 
+            || title.includes("international") 
+            || title.includes("us") 
+            || title.includes("china");
 }
 
 if (!isRelevant) return;
-
-  if (!isRelevant) return;
       const div = document.createElement("div");
 div.className = "card";
       const date = new Date(item.pubDate).toLocaleString();
