@@ -20,7 +20,9 @@ async function fetchNews() {
 let count = 0;
 data.items.forEach(item => {
   const title = item.title.toLowerCase();
-const searchText = document.getElementById("search").value.toLowerCase();
+const parts = item.title.split(" - ");
+const cleanTitle = parts[0];
+  const searchText = document.getElementById("search").value.toLowerCase();
   let isRelevant = false;
 
 // ALL
@@ -57,8 +59,10 @@ div.className = "card";
 div.innerHTML = `
   <img src="${item.thumbnail || ''}" onerror="this.remove()">
 
-  <h3><a href="${item.link}" target="_blank">${item.title}</a></h3>
-
+  <h3><a href="${item.link}" target="_blank">${cleanTitle}</a></h3>
+<p style="font-size:11px; color:#94a3b8;">
+  Source: ${parts.length > 1 ? parts[1] : "Unknown"}
+</p>
   <p style="font-size:13px; opacity:0.8;">
     ${(item.description || "").replace(/<[^>]+>/g, "").slice(0, 120)}...
   </p>
