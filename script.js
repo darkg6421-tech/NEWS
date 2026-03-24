@@ -7,9 +7,7 @@ function setCategory(cat) {
 async function fetchNews() {
   try { 
     document.getElementById("news").innerHTML = "⏳ Loading news...";
-    const res = await fetch(
-      "https://api.rss2json.com/v1/api.json?rss_url=https://news.google.com/rss?hl=en-IN&gl=IN&ceid=IN:en"...ceid=IN:en&t=" + new Date().getTime()
-    );
+    "https://api.rss2json.com/v1/api.json?rss_url=https://news.google.com/rss?hl=en-IN&gl=IN&ceid=IN:en&t=" + new Date().getTime()
 
     const data = await res.json();
 
