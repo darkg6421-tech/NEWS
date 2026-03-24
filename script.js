@@ -2,6 +2,7 @@ let currentCategory = "all";
 let visibleCount = 10;
 let allNews = [];
 let lastRenderedIndex = 0;
+let isLoadingMore = false; // 🔥 control
 
 function setCategory(cat) {
   currentCategory = cat;
@@ -33,7 +34,7 @@ async function fetchNews() {
       combined = combined.concat(data.items);
     }
 
-    // 🔥 sort latest first
+    // latest first
     combined.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
 
     allNews = combined;
@@ -56,8 +57,6 @@ function renderNews() {
   const saved = JSON.parse(localStorage.getItem("savedNews")) || [];
 
   let count = 0;
-  const seen = new Set();
-
   const searchText = document.getElementById("search").value.toLowerCase();
 
   const items = allNews.slice(lastRenderedIndex, visibleCount);
@@ -65,9 +64,6 @@ function renderNews() {
   items.forEach(item => {
 
     const title = item.title.toLowerCase();
-
-    if (seen.has(item.link)) return;
-    seen.add(item.link);
 
     const pubTime = new Date(item.pubDate).getTime();
     if (Date.now() - pubTime > 24 * 60 * 60 * 1000) return;
@@ -124,21 +120,14 @@ function renderNews() {
       <p style="font-size:12px; opacity:0.6;">${date}</p>
     `;
 
-    // 🚨 BREAKING
     if (isBreaking) {
       div.style.border = "2px solid red";
       div.style.background = "#3f1d1d";
-
       div.innerHTML = `<p style="color:red;">🚨 Breaking</p>` + div.innerHTML;
-    }
-
-    // ⭐ IMPORTANT (only if not breaking)
-    else if (count < 3) {
+    } else if (count < 3) {
       div.style.border = "2px solid #38bdf8";
       div.style.background = "#1e3a5f";
-
       div.innerHTML = `<p style="color:#38bdf8;">🔥 Important</p>` + div.innerHTML;
-
       count++;
     }
 
@@ -151,7 +140,7 @@ function renderNews() {
     "Last updated: " + new Date().toLocaleTimeString();
 }
 
-// ⭐ TOGGLE SAVE
+// ⭐ SAVE TOGGLE
 function toggleSave(link, title) {
   let saved = JSON.parse(localStorage.getItem("savedNews")) || [];
 
@@ -166,7 +155,6 @@ function toggleSave(link, title) {
   localStorage.setItem("savedNews", JSON.stringify(saved));
 
   loadSavedNews();
-  renderNews();
 }
 
 // 📌 LOAD SAVED
@@ -198,11 +186,22 @@ function loadSavedNews() {
   });
 }
 
-// ♾️ INFINITE SCROLL
+// ♾️ FIXED SCROLL
 window.addEventListener("scroll", () => {
+
+  if (isLoadingMore) return;
+
   if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 200) {
+
+    isLoadingMore = true;
+
     visibleCount += 5;
-    renderNews();
+
+    requestAnimationFrame(() => {
+      renderNews();
+      isLoadingMore = false;
+    });
+
   }
 });
 
