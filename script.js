@@ -87,10 +87,11 @@ if (count < 3) {
     <p style="color:#38bdf8; font-size:12px;">🔥 Important</p>
   ` + div.innerHTML;
 
+  count++; 
 }
-      if (count >= 10) return;
-  container.appendChild(div);
-  count++;
+
+       container.appendChild(div);
+  
     });
     if (container.innerHTML === "") {
   container.innerHTML = "⚠️ No news found in this category";
