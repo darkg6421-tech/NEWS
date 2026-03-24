@@ -1,10 +1,13 @@
 let currentCategory = "all";
 let visibleCount = 10;
 let allNews = [];
+let lastRenderedIndex = 0;
 
 function setCategory(cat) {
   currentCategory = cat;
   visibleCount = 10;
+  lastRenderedIndex = 0;
+  document.getElementById("news").innerHTML = "";
   fetchNews();
 }
 
@@ -30,7 +33,15 @@ async function fetchNews() {
       combined = combined.concat(data.items);
     }
 
+    // 🔥 sort latest first
+    combined.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+
     allNews = combined;
+
+    const container = document.getElementById("news");
+    container.innerHTML = "";
+
+    lastRenderedIndex = 0;
     renderNews();
 
   } catch (e) {
@@ -40,7 +51,6 @@ async function fetchNews() {
 
 function renderNews() {
   const container = document.getElementById("news");
-  container.innerHTML = "";
 
   const keywords = ["defence", "army", "nda", "government", "education", "policy", "india", "international"];
   const saved = JSON.parse(localStorage.getItem("savedNews")) || [];
@@ -50,7 +60,9 @@ function renderNews() {
 
   const searchText = document.getElementById("search").value.toLowerCase();
 
-  allNews.slice(0, visibleCount).forEach(item => {
+  const items = allNews.slice(lastRenderedIndex, visibleCount);
+
+  items.forEach(item => {
 
     const title = item.title.toLowerCase();
 
@@ -85,7 +97,6 @@ function renderNews() {
     const cleanTitle = parts[0];
     const isSaved = saved.some(s => s.link === item.link);
 
-    // 🚨 BREAKING NEWS
     const breakingWords = ["breaking", "alert", "war", "attack", "crisis"];
     const isBreaking = breakingWords.some(word => title.includes(word));
 
@@ -96,7 +107,6 @@ function renderNews() {
 
     div.innerHTML = `
       <img src="${item.thumbnail || ''}" onerror="this.remove()">
-
       <h3><a href="${item.link}" target="_blank">${cleanTitle}</a></h3>
 
       <button onclick="toggleSave('${item.link}', \`${cleanTitle}\`)">
@@ -114,30 +124,28 @@ function renderNews() {
       <p style="font-size:12px; opacity:0.6;">${date}</p>
     `;
 
-    // 🔥 BREAKING STYLE
+    // 🚨 BREAKING
     if (isBreaking) {
       div.style.border = "2px solid red";
       div.style.background = "#3f1d1d";
 
-      div.innerHTML = `
-        <p style="color:red; font-size:12px;">🚨 Breaking</p>
-      ` + div.innerHTML;
+      div.innerHTML = `<p style="color:red;">🚨 Breaking</p>` + div.innerHTML;
     }
 
-    // ⭐ IMPORTANT TOP 3
-    if (count < 3) {
+    // ⭐ IMPORTANT (only if not breaking)
+    else if (count < 3) {
       div.style.border = "2px solid #38bdf8";
       div.style.background = "#1e3a5f";
 
-      div.innerHTML = `
-        <p style="color:#38bdf8; font-size:12px;">🔥 Important</p>
-      ` + div.innerHTML;
+      div.innerHTML = `<p style="color:#38bdf8;">🔥 Important</p>` + div.innerHTML;
 
       count++;
     }
 
     container.appendChild(div);
   });
+
+  lastRenderedIndex = visibleCount;
 
   document.getElementById("last").innerText =
     "Last updated: " + new Date().toLocaleTimeString();
