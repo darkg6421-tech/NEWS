@@ -77,7 +77,8 @@ async function fetchNews() {
 
         <h3><a href="${item.link}" target="_blank">${cleanTitle}</a></h3>
 
-        <button onclick="saveNews('${item.link}', '${cleanTitle}')">
+        <button onclick="saveNews('${item.link}', '${cleanTitle}')"
+        style="margin:6px 0; padding:6px 12px; background:#38bdf8; border:none; border-radius:6px; color:black; font-weight:bold; cursor:pointer;">
           ⭐ Save
         </button>
 
@@ -92,6 +93,7 @@ async function fetchNews() {
         <p style="font-size:12px; opacity:0.6;">${date}</p>
       `;
 
+      // Important top 3
       if (count < 3) {
         div.style.border = "2px solid #38bdf8";
         div.style.background = "#1e3a5f";
@@ -118,7 +120,7 @@ async function fetchNews() {
   }
 }
 
-// ⭐ SAVE FUNCTION
+// SAVE FUNCTION
 function saveNews(link, title) {
   let saved = JSON.parse(localStorage.getItem("savedNews")) || [];
 
