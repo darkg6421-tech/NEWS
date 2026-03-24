@@ -7,14 +7,16 @@
     body {
       font-family: Arial;
       background: #0f172a;
-      color: white;
+      color: #e2e8f0; /* 🔥 soft white */
       margin: 0;
       padding: 10px;
     }
 
-    h1 { text-align: center; }
+    h1 { 
+      text-align: center; 
+      color: #60a5fa; /* 🔥 blue title */
+    }
 
-    /* 🔥 TOP BAR */
     .topbar {
       display:flex;
       align-items:center;
@@ -22,13 +24,13 @@
       padding:10px;
     }
 
-    /* 🔥 MENU BUTTON */
     .menu-btn {
       font-size:20px;
       padding:8px 12px;
+      background:#1e293b;
+      color:#60a5fa;
     }
 
-    /* 🔥 SIDEBAR MENU */
     #menu {
       position:fixed;
       top:0;
@@ -43,6 +45,7 @@
 
     #menu h3 {
       margin-top:0;
+      color:#60a5fa;
     }
 
     #menu p {
@@ -50,13 +53,13 @@
       margin:12px 0;
       padding:8px;
       border-radius:6px;
+      color:#e2e8f0;
     }
 
     #menu p:hover {
       background:#334155;
     }
 
-    /* 🔥 CONTENT */
     #news, #saved, #premium {
       display:flex;
       flex-direction:column;
@@ -77,12 +80,26 @@
       border-radius:8px;
     }
 
+    /* 🔥 TITLE LINK */
+    .card a {
+      color: #60a5fa;  /* blue */
+      text-decoration: none;
+    }
+
+    /* 🔥 SOURCE COLOR */
+    .source {
+      font-size:11px;
+      color:#22c55e; /* green trust */
+    }
+
     button {
       padding:10px;
       border-radius:10px;
       border:none;
       cursor:pointer;
       margin-top:5px;
+      background:#38bdf8;
+      color:black;
     }
 
     input {
@@ -91,9 +108,10 @@
       margin:10px 0;
       border-radius:10px;
       border:none;
+      background:#1e293b;
+      color:white;
     }
 
-    /* 🔥 FOOTER */
     footer {
       margin-top:30px;
       text-align:center;
@@ -102,7 +120,7 @@
     }
 
     footer a {
-      color:#38bdf8;
+      color:#60a5fa;
       margin:0 8px;
     }
   </style>
@@ -110,13 +128,11 @@
 
 <body>
 
-<!-- 🔥 TOP BAR -->
 <div class="topbar">
   <button class="menu-btn" onclick="toggleMenu()">☰</button>
-  <h2>News App</h2>
+  <h2 style="color:#60a5fa;">News App</h2>
 </div>
 
-<!-- 🔥 SIDEBAR -->
 <div id="menu">
   <h3>Menu</h3>
   <p onclick="showSection('home')">🏠 Home</p>
@@ -144,24 +160,20 @@
 
 <p id="last"></p>
 
-<!-- 🔥 HOME -->
 <div id="homeSection">
   <div id="news">Loading...</div>
 </div>
 
-<!-- 🔥 SAVED -->
 <div id="savedSection" style="display:none;">
   <h2>⭐ Saved News</h2>
   <div id="saved"></div>
 </div>
 
-<!-- 🔥 PREMIUM -->
 <div id="premiumSection" style="display:none;">
   <h2>🔥 Oil Premium News</h2>
   <div id="premium"></div>
 </div>
 
-<!-- 🔥 FOOTER -->
 <footer>
   <hr>
   <p>
