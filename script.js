@@ -77,8 +77,7 @@ async function fetchNews() {
 
         <h3><a href="${item.link}" target="_blank">${cleanTitle}</a></h3>
 
-        <button onclick="saveNews('${item.link}', '${cleanTitle}')"
-        style="margin:6px 0; padding:6px 12px; background:#38bdf8; border:none; border-radius:6px; color:black; font-weight:bold; cursor:pointer;">
+        <button onclick="saveNews('${item.link}', \`${cleanTitle}\`)">
           ⭐ Save
         </button>
 
@@ -93,7 +92,6 @@ async function fetchNews() {
         <p style="font-size:12px; opacity:0.6;">${date}</p>
       `;
 
-      // Important top 3
       if (count < 3) {
         div.style.border = "2px solid #38bdf8";
         div.style.background = "#1e3a5f";
@@ -120,16 +118,43 @@ async function fetchNews() {
   }
 }
 
-// SAVE FUNCTION
+// ✅ SAVE FUNCTION (no duplicate)
 function saveNews(link, title) {
   let saved = JSON.parse(localStorage.getItem("savedNews")) || [];
 
-  saved.push({ link, title });
+  if (saved.some(item => item.link === link)) {
+    alert("Already saved!");
+    return;
+  }
 
+  saved.push({ link, title });
   localStorage.setItem("savedNews", JSON.stringify(saved));
 
-  alert("Saved!");
+  loadSavedNews();
 }
 
+// ✅ LOAD SAVED NEWS
+function loadSavedNews() {
+  const savedContainer = document.getElementById("saved");
+  if (!savedContainer) return;
+
+  const saved = JSON.parse(localStorage.getItem("savedNews")) || [];
+
+  savedContainer.innerHTML = "";
+
+  saved.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "card";
+
+    div.innerHTML = `
+      <h3><a href="${item.link}" target="_blank">${item.title}</a></h3>
+    `;
+
+    savedContainer.appendChild(div);
+  });
+}
+
+// INIT
 fetchNews();
+loadSavedNews();
 setInterval(fetchNews, 300000);
