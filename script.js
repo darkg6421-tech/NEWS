@@ -20,8 +20,16 @@ async function fetchNews() {
 
     const keywords = ["defence", "army", "nda", "government", "education", "policy", "india", "international"];
 let count = 0;
+    const seen = new Set();
 data.items.forEach(item => {
   const title = item.title.toLowerCase();
+  if (seen.has(item.link)) return;
+seen.add(item.link);
+  const pubTime = new Date(item.pubDate).getTime();
+const now = Date.now();
+
+if (seen.has(item.link)) return;
+seen.add(item.link);
 const parts = item.title.split(" - ");
 const cleanTitle = parts[0];
   const searchText = document.getElementById("search").value.toLowerCase();
@@ -68,7 +76,7 @@ div.innerHTML = `
   <p style="font-size:13px; opacity:0.8;">
     ${(item.description || "").replace(/<[^>]+>/g, "").slice(0, 120)}...
   </p>
-
+count++;
   <p style="font-size:12px; opacity:0.6;">${date}</p>
 `;
 if (count < 3) {
@@ -81,7 +89,8 @@ if (count < 3) {
 
   count++;
 }
-      container.appendChild(div);
+      if (count >= 10) return;
+  container.appendChild(div);
     });
     if (container.innerHTML === "") {
   container.innerHTML = "⚠️ No news found in this category";
