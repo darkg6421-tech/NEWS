@@ -20,7 +20,7 @@ async function fetchNews() {
 let count = 0;
 data.items.forEach(item => {
   const title = item.title.toLowerCase();
-
+const searchText = document.getElementById("search").value.toLowerCase();
   let isRelevant = false;
 
 // ALL
@@ -48,7 +48,7 @@ if (currentCategory === "world") {
             || title.includes("us") 
             || title.includes("china");
 }
-
+if (searchText && !title.includes(searchText)) return;
 if (!isRelevant) return;
       const div = document.createElement("div");
 div.className = "card";
