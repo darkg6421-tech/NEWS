@@ -100,12 +100,25 @@
       font-size:14px;
     }
 
-    /* 🔥 loading text for infinite scroll */
     #loadingMore {
       text-align:center;
       opacity:0.6;
       margin:15px 0;
       display:none;
+    }
+
+    /* 🔥 Footer */
+    footer {
+      margin-top: 30px;
+      text-align: center;
+      font-size: 14px;
+      color: #94a3b8;
+    }
+
+    footer a {
+      color: #38bdf8;
+      text-decoration: none;
+      margin: 0 8px;
     }
   </style>
 
@@ -134,16 +147,24 @@
 
 <p id="last"></p>
 
-<!-- 🔥 LIVE NEWS -->
 <div id="news">Loading...</div>
 
 <p id="loadingMore">Loading more news...</p>
 
-<!-- 🔥 SAVED NEWS -->
 <h2 class="section-title">⭐ Saved News</h2>
 <div id="saved">
   <p class="empty">No saved news yet</p>
 </div>
+
+<!-- 🔥 FOOTER (IMPORTANT FOR ADSENSE) -->
+<footer>
+  <hr>
+  <p>
+    <a href="privacy.html">Privacy Policy</a> |
+    <a href="about.html">About</a> |
+    <a href="contact.html">Contact</a>
+  </p>
+</footer>
 
 <script src="script.js?v=5"></script>
 
