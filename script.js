@@ -1,7 +1,10 @@
 let currentCategory = "all";
+let visibleCount = 10;
+let allNews = [];
 
 function setCategory(cat) {
   currentCategory = cat;
+  visibleCount = 10;
   fetchNews();
 }
 
@@ -9,116 +12,135 @@ async function fetchNews() {
   try { 
     document.getElementById("news").innerHTML = "Loading news...";
 
-    const res = await fetch(
-      "https://api.rss2json.com/v1/api.json?rss_url=" +
-      encodeURIComponent("https://news.google.com/rss?hl=en-IN&gl=IN&ceid=IN:en") +
-      "&t=" + new Date().getTime()
-    );
+    const feeds = [
+      "https://news.google.com/rss?hl=en-IN&gl=IN&ceid=IN:en",
+      "https://news.google.com/rss/search?q=india",
+      "https://news.google.com/rss/search?q=defence"
+    ];
 
-    const data = await res.json();
+    let combined = [];
 
-    const container = document.getElementById("news");
-    container.innerHTML = "";
-
-    const keywords = ["defence", "army", "nda", "government", "education", "policy", "india", "international"];
-
-    let count = 0;
-    const seen = new Set();
-    const saved = JSON.parse(localStorage.getItem("savedNews")) || [];
-
-    data.items.forEach(item => {
-
-      const title = item.title.toLowerCase();
-
-      if (seen.has(item.link)) return;
-      seen.add(item.link);
-
-      const pubTime = new Date(item.pubDate).getTime();
-      const now = Date.now();
-      if (now - pubTime > 24 * 60 * 60 * 1000) return;
-
-      const parts = item.title.split(" - ");
-      const cleanTitle = parts[0];
-
-      const searchText = document.getElementById("search").value.toLowerCase();
-      let isRelevant = false;
-
-      if (currentCategory === "all") {
-        isRelevant = keywords.some(k => title.includes(k));
-      }
-
-      if (currentCategory === "india") {
-        isRelevant = title.includes("india");
-      }
-
-      if (currentCategory === "defence") {
-        isRelevant = title.includes("army") 
-                  || title.includes("defence") 
-                  || title.includes("military") 
-                  || title.includes("war");
-      }
-
-      if (currentCategory === "world") {
-        isRelevant = title.includes("world") 
-                  || title.includes("international") 
-                  || title.includes("us") 
-                  || title.includes("china");
-      }
-
-      if (searchText && !title.includes(searchText)) return;
-      if (!isRelevant) return;
-
-      const isSaved = saved.some(s => s.link === item.link);
-
-      const div = document.createElement("div");
-      div.className = "card";
-
-      const date = new Date(item.pubDate).toLocaleString();
-
-      div.innerHTML = `
-        <img src="${item.thumbnail || ''}" onerror="this.remove()">
-
-        <h3><a href="${item.link}" target="_blank">${cleanTitle}</a></h3>
-
-        <button onclick="toggleSave('${item.link}', \`${cleanTitle}\`)">
-          ${isSaved ? "❌ Remove" : "⭐ Save"}
-        </button>
-
-        <p style="font-size:11px; color:#94a3b8;">
-          Source: ${parts.length > 1 ? parts[1] : "Unknown"}
-        </p>
-
-        <p style="font-size:13px; opacity:0.8;">
-          ${(item.description || "").replace(/<[^>]+>/g, "").slice(0, 120)}...
-        </p>
-
-        <p style="font-size:12px; opacity:0.6;">${date}</p>
-      `;
-
-      if (count < 3) {
-        div.style.border = "2px solid #38bdf8";
-        div.style.background = "#1e3a5f";
-
-        div.innerHTML = `
-          <p style="color:#38bdf8; font-size:12px;">🔥 Important</p>
-        ` + div.innerHTML;
-
-        count++;
-      }
-
-      container.appendChild(div);
-    });
-
-    if (container.innerHTML === "") {
-      container.innerHTML = "No news found in this category";
+    for (let url of feeds) {
+      const res = await fetch(
+        "https://api.rss2json.com/v1/api.json?rss_url=" +
+        encodeURIComponent(url) +
+        "&t=" + new Date().getTime()
+      );
+      const data = await res.json();
+      combined = combined.concat(data.items);
     }
 
-    document.getElementById("last").innerText =
-      "Last updated: " + new Date().toLocaleTimeString();
+    allNews = combined;
+    renderNews();
 
   } catch (e) {
     document.getElementById("news").innerHTML = "Error loading news";
   }
+}
+
+function renderNews() {
+  const container = document.getElementById("news");
+  container.innerHTML = "";
+
+  const keywords = ["defence", "army", "nda", "government", "education", "policy", "india", "international"];
+  const saved = JSON.parse(localStorage.getItem("savedNews")) || [];
+
+  let count = 0;
+  const seen = new Set();
+
+  const searchText = document.getElementById("search").value.toLowerCase();
+
+  allNews.slice(0, visibleCount).forEach(item => {
+
+    const title = item.title.toLowerCase();
+
+    if (seen.has(item.link)) return;
+    seen.add(item.link);
+
+    const pubTime = new Date(item.pubDate).getTime();
+    if (Date.now() - pubTime > 24 * 60 * 60 * 1000) return;
+
+    let isRelevant = false;
+
+    if (currentCategory === "all") {
+      isRelevant = keywords.some(k => title.includes(k));
+    }
+
+    if (currentCategory === "india") {
+      isRelevant = title.includes("india");
+    }
+
+    if (currentCategory === "defence") {
+      isRelevant = title.includes("army") || title.includes("defence") || title.includes("war");
+    }
+
+    if (currentCategory === "world") {
+      isRelevant = title.includes("world") || title.includes("international") || title.includes("us") || title.includes("china");
+    }
+
+    if (searchText && !title.includes(searchText)) return;
+    if (!isRelevant) return;
+
+    const parts = item.title.split(" - ");
+    const cleanTitle = parts[0];
+    const isSaved = saved.some(s => s.link === item.link);
+
+    // 🚨 BREAKING NEWS
+    const breakingWords = ["breaking", "alert", "war", "attack", "crisis"];
+    const isBreaking = breakingWords.some(word => title.includes(word));
+
+    const div = document.createElement("div");
+    div.className = "card";
+
+    const date = new Date(item.pubDate).toLocaleString();
+
+    div.innerHTML = `
+      <img src="${item.thumbnail || ''}" onerror="this.remove()">
+
+      <h3><a href="${item.link}" target="_blank">${cleanTitle}</a></h3>
+
+      <button onclick="toggleSave('${item.link}', \`${cleanTitle}\`)">
+        ${isSaved ? "❌ Remove" : "⭐ Save"}
+      </button>
+
+      <p style="font-size:11px; color:#94a3b8;">
+        Source: ${parts.length > 1 ? parts[1] : "Unknown"}
+      </p>
+
+      <p style="font-size:13px; opacity:0.8;">
+        ${(item.description || "").replace(/<[^>]+>/g, "").slice(0, 120)}...
+      </p>
+
+      <p style="font-size:12px; opacity:0.6;">${date}</p>
+    `;
+
+    // 🔥 BREAKING STYLE
+    if (isBreaking) {
+      div.style.border = "2px solid red";
+      div.style.background = "#3f1d1d";
+
+      div.innerHTML = `
+        <p style="color:red; font-size:12px;">🚨 Breaking</p>
+      ` + div.innerHTML;
+    }
+
+    // ⭐ IMPORTANT TOP 3
+    if (count < 3) {
+      div.style.border = "2px solid #38bdf8";
+      div.style.background = "#1e3a5f";
+
+      div.innerHTML = `
+        <p style="color:#38bdf8; font-size:12px;">🔥 Important</p>
+      ` + div.innerHTML;
+
+      count++;
+    }
+
+    container.appendChild(div);
+  });
+
+  document.getElementById("last").innerText =
+    "Last updated: " + new Date().toLocaleTimeString();
 }
 
 // ⭐ TOGGLE SAVE
@@ -136,10 +158,10 @@ function toggleSave(link, title) {
   localStorage.setItem("savedNews", JSON.stringify(saved));
 
   loadSavedNews();
-  fetchNews(); // update button instantly
+  renderNews();
 }
 
-// 📌 LOAD SAVED NEWS
+// 📌 LOAD SAVED
 function loadSavedNews() {
   const savedContainer = document.getElementById("saved");
   if (!savedContainer) return;
@@ -167,6 +189,14 @@ function loadSavedNews() {
     savedContainer.appendChild(div);
   });
 }
+
+// ♾️ INFINITE SCROLL
+window.addEventListener("scroll", () => {
+  if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 200) {
+    visibleCount += 5;
+    renderNews();
+  }
+});
 
 // INIT
 fetchNews();
