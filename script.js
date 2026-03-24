@@ -87,7 +87,7 @@ if (count < 3) {
     <p style="color:#38bdf8; font-size:12px;">🔥 Important</p>
   ` + div.innerHTML;
 
-  count++; 
+  count++;
 }
 
        container.appendChild(div);
