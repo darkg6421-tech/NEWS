@@ -8,6 +8,7 @@
       font-family: Arial;
       background: #0f172a;
       color: white;
+      margin: 0;
       padding: 10px;
     }
 
@@ -18,9 +19,16 @@
       display:flex;
       align-items:center;
       gap:10px;
+      padding:10px;
     }
 
-    /* 🔥 MENU */
+    /* 🔥 MENU BUTTON */
+    .menu-btn {
+      font-size:20px;
+      padding:8px 12px;
+    }
+
+    /* 🔥 SIDEBAR MENU */
     #menu {
       position:fixed;
       top:0;
@@ -33,11 +41,22 @@
       z-index:999;
     }
 
-    #menu p {
-      cursor:pointer;
-      margin:10px 0;
+    #menu h3 {
+      margin-top:0;
     }
 
+    #menu p {
+      cursor:pointer;
+      margin:12px 0;
+      padding:8px;
+      border-radius:6px;
+    }
+
+    #menu p:hover {
+      background:#334155;
+    }
+
+    /* 🔥 CONTENT */
     #news, #saved, #premium {
       display:flex;
       flex-direction:column;
@@ -74,6 +93,7 @@
       border:none;
     }
 
+    /* 🔥 FOOTER */
     footer {
       margin-top:30px;
       text-align:center;
@@ -90,9 +110,9 @@
 
 <body>
 
-<!-- 🔥 MENU BUTTON -->
+<!-- 🔥 TOP BAR -->
 <div class="topbar">
-  <button onclick="toggleMenu()">☰</button>
+  <button class="menu-btn" onclick="toggleMenu()">☰</button>
   <h2>News App</h2>
 </div>
 
@@ -113,7 +133,7 @@
   oninput="fetchNews()"
 />
 
-<div>
+<div style="display:flex; gap:10px; flex-wrap:wrap;">
   <button onclick="setCategory('all')">All</button>
   <button onclick="setCategory('india')">India</button>
   <button onclick="setCategory('defence')">Defence</button>
@@ -131,7 +151,7 @@
 
 <!-- 🔥 SAVED -->
 <div id="savedSection" style="display:none;">
-  <h2>Saved News</h2>
+  <h2>⭐ Saved News</h2>
   <div id="saved"></div>
 </div>
 
