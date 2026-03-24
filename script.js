@@ -76,6 +76,9 @@ if (count < 3) {
 }
       container.appendChild(div);
     });
+    if (container.innerHTML === "") {
+  container.innerHTML = "⚠️ No news found in this category";
+}
 document.getElementById("last").innerText =
   "Last updated: " + new Date().toLocaleTimeString();
   } catch (e) {
