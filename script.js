@@ -2,8 +2,35 @@ let currentCategory = "all";
 let visibleCount = 10;
 let allNews = [];
 let lastRenderedIndex = 0;
-let isLoadingMore = false; // 🔥 control
+let isLoadingMore = false;
 
+// 🔥 MENU
+function toggleMenu() {
+  const menu = document.getElementById("menu");
+  menu.style.left = menu.style.left === "0px" ? "-220px" : "0px";
+}
+
+function showSection(section) {
+  document.getElementById("homeSection").style.display = "none";
+  document.getElementById("savedSection").style.display = "none";
+  document.getElementById("premiumSection").style.display = "none";
+
+  if (section === "home") document.getElementById("homeSection").style.display = "block";
+
+  if (section === "saved") {
+    document.getElementById("savedSection").style.display = "block";
+    loadSavedNews();
+  }
+
+  if (section === "premium") {
+    document.getElementById("premiumSection").style.display = "block";
+    loadPremiumNews();
+  }
+
+  toggleMenu();
+}
+
+// 🔥 CATEGORY
 function setCategory(cat) {
   currentCategory = cat;
   visibleCount = 10;
@@ -12,6 +39,7 @@ function setCategory(cat) {
   fetchNews();
 }
 
+// 🔥 FETCH NEWS
 async function fetchNews() {
   try { 
     document.getElementById("news").innerHTML = "Loading news...";
@@ -34,15 +62,14 @@ async function fetchNews() {
       combined = combined.concat(data.items);
     }
 
-    // latest first
+    // 🔥 sort latest
     combined.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
 
     allNews = combined;
 
-    const container = document.getElementById("news");
-    container.innerHTML = "";
-
+    document.getElementById("news").innerHTML = "";
     lastRenderedIndex = 0;
+
     renderNews();
 
   } catch (e) {
@@ -50,6 +77,7 @@ async function fetchNews() {
   }
 }
 
+// 🔥 RENDER
 function renderNews() {
   const container = document.getElementById("news");
 
@@ -140,7 +168,7 @@ function renderNews() {
     "Last updated: " + new Date().toLocaleTimeString();
 }
 
-// ⭐ SAVE TOGGLE
+// 🔥 SAVE TOGGLE
 function toggleSave(link, title) {
   let saved = JSON.parse(localStorage.getItem("savedNews")) || [];
 
@@ -157,7 +185,7 @@ function toggleSave(link, title) {
   loadSavedNews();
 }
 
-// 📌 LOAD SAVED
+// 🔥 LOAD SAVED
 function loadSavedNews() {
   const savedContainer = document.getElementById("saved");
   if (!savedContainer) return;
@@ -186,22 +214,44 @@ function loadSavedNews() {
   });
 }
 
-// ♾️ FIXED SCROLL
-window.addEventListener("scroll", () => {
+// 🔥 PREMIUM (OIL NEWS)
+async function loadPremiumNews() {
+  const container = document.getElementById("premium");
+  container.innerHTML = "Loading premium news...";
 
+  const res = await fetch(
+    "https://api.rss2json.com/v1/api.json?rss_url=" +
+    encodeURIComponent("https://news.google.com/rss/search?q=oil")
+  );
+
+  const data = await res.json();
+
+  container.innerHTML = "";
+
+  data.items.slice(0, 10).forEach(item => {
+    const div = document.createElement("div");
+    div.className = "card";
+
+    div.innerHTML = `
+      <h3><a href="${item.link}" target="_blank">${item.title}</a></h3>
+    `;
+
+    container.appendChild(div);
+  });
+}
+
+// 🔥 INFINITE SCROLL
+window.addEventListener("scroll", () => {
   if (isLoadingMore) return;
 
   if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 200) {
-
     isLoadingMore = true;
-
     visibleCount += 5;
 
     requestAnimationFrame(() => {
       renderNews();
       isLoadingMore = false;
     });
-
   }
 });
 
