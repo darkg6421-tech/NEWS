@@ -77,6 +77,10 @@ async function fetchNews() {
 
         <h3><a href="${item.link}" target="_blank">${cleanTitle}</a></h3>
 
+        <button onclick="saveNews('${item.link}', '${cleanTitle}')">
+          ⭐ Save
+        </button>
+
         <p style="font-size:11px; color:#94a3b8;">
           Source: ${parts.length > 1 ? parts[1] : "Unknown"}
         </p>
@@ -114,6 +118,16 @@ async function fetchNews() {
   }
 }
 
-fetchNews();
+// ⭐ SAVE FUNCTION
+function saveNews(link, title) {
+  let saved = JSON.parse(localStorage.getItem("savedNews")) || [];
 
+  saved.push({ link, title });
+
+  localStorage.setItem("savedNews", JSON.stringify(saved));
+
+  alert("Saved!");
+}
+
+fetchNews();
 setInterval(fetchNews, 300000);
