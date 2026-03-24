@@ -99,6 +99,14 @@
       opacity:0.7;
       font-size:14px;
     }
+
+    /* 🔥 loading text for infinite scroll */
+    #loadingMore {
+      text-align:center;
+      opacity:0.6;
+      margin:15px 0;
+      display:none;
+    }
   </style>
 
 </head>
@@ -129,13 +137,15 @@
 <!-- 🔥 LIVE NEWS -->
 <div id="news">Loading...</div>
 
+<p id="loadingMore">Loading more news...</p>
+
 <!-- 🔥 SAVED NEWS -->
 <h2 class="section-title">⭐ Saved News</h2>
 <div id="saved">
   <p class="empty">No saved news yet</p>
 </div>
 
-<script src="script.js?v=4"></script>
+<script src="script.js?v=5"></script>
 
 </body>
 </html>
