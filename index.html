@@ -83,6 +83,21 @@
       margin-top: 25px;
       font-size: 18px;
       color: #38bdf8;
+      text-align: center;
+    }
+
+    .top-controls {
+      display:flex;
+      gap:10px;
+      justify-content:center;
+      margin:10px 0;
+      flex-wrap: wrap;
+    }
+
+    .empty {
+      text-align:center;
+      opacity:0.7;
+      font-size:14px;
     }
   </style>
 
@@ -98,14 +113,16 @@
   oninput="fetchNews()"
 />
 
-<div style="display:flex; gap:10px; justify-content:center; margin:10px 0;">
+<div class="top-controls">
   <button onclick="setCategory('all')">All</button>
   <button onclick="setCategory('india')">India</button>
   <button onclick="setCategory('defence')">Defence</button>
   <button onclick="setCategory('world')">World</button>
 </div>
 
-<button onclick="fetchNews()">🔄 Refresh</button>
+<div class="top-controls">
+  <button onclick="fetchNews()">🔄 Refresh</button>
+</div>
 
 <p id="last"></p>
 
@@ -114,9 +131,11 @@
 
 <!-- 🔥 SAVED NEWS -->
 <h2 class="section-title">⭐ Saved News</h2>
-<div id="saved"></div>
+<div id="saved">
+  <p class="empty">No saved news yet</p>
+</div>
 
-<script src="script.js?v=3"></script>
+<script src="script.js?v=4"></script>
 
 </body>
 </html>
