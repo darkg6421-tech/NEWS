@@ -24,6 +24,7 @@ async function fetchNews() {
 
     let count = 0;
     const seen = new Set();
+    const saved = JSON.parse(localStorage.getItem("savedNews")) || [];
 
     data.items.forEach(item => {
 
@@ -67,6 +68,8 @@ async function fetchNews() {
       if (searchText && !title.includes(searchText)) return;
       if (!isRelevant) return;
 
+      const isSaved = saved.some(s => s.link === item.link);
+
       const div = document.createElement("div");
       div.className = "card";
 
@@ -77,8 +80,8 @@ async function fetchNews() {
 
         <h3><a href="${item.link}" target="_blank">${cleanTitle}</a></h3>
 
-        <button onclick="saveNews('${item.link}', \`${cleanTitle}\`)">
-          ⭐ Save
+        <button onclick="toggleSave('${item.link}', \`${cleanTitle}\`)">
+          ${isSaved ? "❌ Remove" : "⭐ Save"}
         </button>
 
         <p style="font-size:11px; color:#94a3b8;">
@@ -118,22 +121,25 @@ async function fetchNews() {
   }
 }
 
-// ✅ SAVE FUNCTION (no duplicate)
-function saveNews(link, title) {
+// ⭐ TOGGLE SAVE
+function toggleSave(link, title) {
   let saved = JSON.parse(localStorage.getItem("savedNews")) || [];
 
-  if (saved.some(item => item.link === link)) {
-    alert("Already saved!");
-    return;
+  const exists = saved.find(item => item.link === link);
+
+  if (exists) {
+    saved = saved.filter(item => item.link !== link);
+  } else {
+    saved.push({ link, title });
   }
 
-  saved.push({ link, title });
   localStorage.setItem("savedNews", JSON.stringify(saved));
 
   loadSavedNews();
+  fetchNews(); // update button instantly
 }
 
-// ✅ LOAD SAVED NEWS
+// 📌 LOAD SAVED NEWS
 function loadSavedNews() {
   const savedContainer = document.getElementById("saved");
   if (!savedContainer) return;
@@ -142,12 +148,20 @@ function loadSavedNews() {
 
   savedContainer.innerHTML = "";
 
+  if (saved.length === 0) {
+    savedContainer.innerHTML = "<p class='empty'>No saved news yet</p>";
+    return;
+  }
+
   saved.forEach(item => {
     const div = document.createElement("div");
     div.className = "card";
 
     div.innerHTML = `
       <h3><a href="${item.link}" target="_blank">${item.title}</a></h3>
+      <button onclick="toggleSave('${item.link}', \`${item.title}\`)">
+        ❌ Remove
+      </button>
     `;
 
     savedContainer.appendChild(div);
