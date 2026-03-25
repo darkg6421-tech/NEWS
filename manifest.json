@@ -2,50 +2,50 @@
   "name": "NewsHub - Latest News",
   "short_name": "NewsHub",
   "description": "Stay updated with latest news from India and around the world",
-  "start_url": "/",
+  "start_url": "/NEWS/",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#60a5fa",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "icon-72x72.png",
+      "src": "https://via.placeholder.com/72x72/60a5fa/ffffff?text=N",
       "sizes": "72x72",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
-      "src": "icon-96x96.png",
+      "src": "https://via.placeholder.com/96x96/60a5fa/ffffff?text=N",
       "sizes": "96x96",
       "type": "image/png"
     },
     {
-      "src": "icon-128x128.png",
+      "src": "https://via.placeholder.com/128x128/60a5fa/ffffff?text=N",
       "sizes": "128x128",
       "type": "image/png"
     },
     {
-      "src": "icon-144x144.png",
+      "src": "https://via.placeholder.com/144x144/60a5fa/ffffff?text=N",
       "sizes": "144x144",
       "type": "image/png"
     },
     {
-      "src": "icon-152x152.png",
+      "src": "https://via.placeholder.com/152x152/60a5fa/ffffff?text=N",
       "sizes": "152x152",
       "type": "image/png"
     },
     {
-      "src": "icon-192x192.png",
+      "src": "https://via.placeholder.com/192x192/60a5fa/ffffff?text=N",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
-      "src": "icon-384x384.png",
+      "src": "https://via.placeholder.com/384x384/60a5fa/ffffff?text=N",
       "sizes": "384x384",
       "type": "image/png"
     },
     {
-      "src": "icon-512x512.png",
+      "src": "https://via.placeholder.com/512x512/60a5fa/ffffff?text=N",
       "sizes": "512x512",
       "type": "image/png"
     }
