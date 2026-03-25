@@ -1,0 +1,11 @@
+# Robots.txt for NewsHub
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /private/
+
+# Sitemap location
+Sitemap: https://yourdomain.com/sitemap.xml
+
+# Crawl delay for bots
+Crawl-delay: 10
