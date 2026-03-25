@@ -1,13 +1,17 @@
 // Service Worker for NewsHub
 const CACHE_NAME = 'newshub-v1';
+
+// Get base path automatically
+const basePath = self.location.pathname.replace('sw.js', '');
+
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/about.html',
-  '/contact.html',
-  '/privacy.html',
-  '/script.js',
-  '/manifest.json'
+  basePath,
+  basePath + 'index.html',
+  basePath + 'about.html',
+  basePath + 'contact.html',
+  basePath + 'privacy.html',
+  basePath + 'script.js',
+  basePath + 'manifest.json'
 ];
 
 // Install Service Worker
@@ -15,7 +19,7 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('Cache opened');
+        console.log('Cache opened for:', basePath);
         return cache.addAll(urlsToCache);
       })
   );
@@ -26,30 +30,22 @@ self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-        // Return cached version if available
         if (response) {
           return response;
         }
         
-        // Otherwise fetch from network
-        return fetch(event.request).then(
-          response => {
-            // Check if valid response
-            if(!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
-            
-            // Clone response for caching
-            const responseToCache = response.clone();
-            
-            caches.open(CACHE_NAME)
-              .then(cache => {
-                cache.put(event.request, responseToCache);
-              });
-              
+        return fetch(event.request).then(response => {
+          if(!response || response.status !== 200 || response.type !== 'basic') {
             return response;
           }
-        );
+          
+          const responseToCache = response.clone();
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, responseToCache);
+          });
+          
+          return response;
+        });
       })
   );
 });
