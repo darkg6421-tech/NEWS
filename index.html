@@ -3,37 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  
-  <!-- SEO & Open Graph -->
-  <meta name="description" content="NewsHub - AI-Powered News Platform | Breaking News, Personalized Feed, Offline Reading">
-  <meta name="keywords" content="news, AI news, personalized news, breaking news, India news, world news">
-  <meta name="author" content="NewsHub Enterprise">
-  <meta name="robots" content="index, follow">
-  
-  <!-- Open Graph -->
-  <meta property="og:title" content="NewsHub - AI News Platform">
-  <meta property="og:description" content="Stay ahead with AI-curated news">
-  <meta property="og:image" content="https://news-hub-enterprise.vercel.app/og-image.jpg">
-  <meta property="og:url" content="https://yourusername.github.io/news-hub">
-  <meta property="og:type" content="website">
-  
-  <!-- PWA v2.0 -->
-  <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0f172a">
+  <meta name="description" content="Stay updated with latest news from India and around the world">
+  <meta name="keywords" content="news, latest news, india news, world news">
+  <meta name="author" content="News App">
+  
+  <title>NewsHub - Latest News</title>
+  
+  <!-- PWA Support -->
+  <link rel="manifest" href="manifest.json">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="NewsHub Pro">
-  
-  <title>NewsHub Pro - AI News Platform</title>
-  
-  <!-- Fonts & Icons -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="icon" type="image/png" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📰</text></svg>">
+  <meta name="apple-mobile-web-app-title" content="NewsHub">
   
   <style>
-    /* [YOUR ORIGINAL CSS + ENHANCEMENTS] */
     * {
       margin: 0;
       padding: 0;
@@ -41,222 +24,489 @@
     }
 
     :root {
-      --bg-primary: #0a0e1a;
-      --bg-secondary: #1a1f2e;
-      --bg-tertiary: #2a2f45;
-      --glass-bg: rgba(255,255,255,0.05);
-      --text-primary: #f8fafc;
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-tertiary: #334155;
+      --text-primary: #f1f5f9;
       --text-secondary: #cbd5e1;
-      --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      --accent-blue: #3b82f6;
-      --accent-green: #10b981;
-      --accent-gold: #f59e0b;
-      --shadow-glass: 0 8px 32px rgba(0,0,0,0.3);
-      --shadow-neumorph: 8px 8px 16px rgba(0,0,0,0.3), -8px -8px 16px rgba(255,255,255,0.1);
-      --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      --accent-blue: #60a5fa;
+      --accent-green: #22c55e;
+      --accent-red: #ef4444;
+      --accent-yellow: #fbbf24;
+      --shadow: 0 8px 16px rgba(0,0,0,0.3);
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     [data-theme="light"] {
       --bg-primary: #f8fafc;
       --bg-secondary: #ffffff;
-      --bg-tertiary: #f1f5f9;
-      --glass-bg: rgba(0,0,0,0.05);
+      --bg-tertiary: #e2e8f0;
       --text-primary: #0f172a;
-      --text-secondary: #475569;
-      --shadow-glass: 0 8px 32px rgba(0,0,0,0.1);
+      --text-secondary: #334155;
+      --shadow: 0 8px 16px rgba(0,0,0,0.1);
     }
 
     body {
-      font-family: 'Inter', system-ui, sans-serif;
-      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      background: var(--bg-primary);
       color: var(--text-primary);
-      min-height: 100vh;
+      transition: var(--transition);
       overflow-x: hidden;
-      position: relative;
     }
 
-    /* Animated Background */
-    body::before {
-      content: '';
+    /* Modern Scrollbar */
+    ::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-secondary);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--accent-blue);
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #3b82f6;
+    }
+
+    /* Top Bar */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--bg-secondary);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .menu-btn, .theme-toggle {
+      background: var(--bg-tertiary);
+      border: none;
+      font-size: 24px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: var(--transition);
+      color: var(--accent-blue);
+    }
+
+    .menu-btn:hover, .theme-toggle:hover {
+      transform: scale(1.05);
+      background: var(--accent-blue);
+      color: white;
+    }
+
+    h1, h2 {
+      font-size: 1.5rem;
+      background: linear-gradient(135deg, var(--accent-blue), #8b5cf6);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin: 0;
+    }
+
+    /* Side Menu */
+    #menu {
       position: fixed;
       top: 0;
-      left: 0;
-      width: 100%;
+      left: -300px;
+      width: 280px;
       height: 100%;
-      background: 
-        radial-gradient(circle at 20% 80%, rgba(120,119,198,0.3) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(255,119,198,0.3) 0%, transparent 50%),
-        radial-gradient(circle at 40% 40%, rgba(120,219,255,0.3) 0%, transparent 50%);
-      pointer-events: none;
-      z-index: -1;
-      animation: float 20s ease-in-out infinite;
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(0px) rotate(0deg); }
-      33% { transform: translateY(-20px) rotate(120deg); }
-      66% { transform: translateY(10px) rotate(240deg); }
-    }
-
-    /* Glassmorphism Components */
-    .glass {
-      background: var(--glass-bg);
+      background: var(--bg-secondary);
       backdrop-filter: blur(20px);
-      border: 1px solid rgba(255,255,255,0.1);
-      box-shadow: var(--shadow-glass);
+      padding: 20px;
+      transition: var(--transition);
+      z-index: 1000;
+      box-shadow: 2px 0 20px rgba(0,0,0,0.3);
+      overflow-y: auto;
     }
 
-    /* Skeleton Loading */
-    .skeleton {
-      background: linear-gradient(90deg, var(--bg-tertiary) 25%, rgba(255,255,255,0.1) 50%, var(--bg-tertiary) 75%);
-      background-size: 200% 100%;
-      animation: loading 1.5s infinite;
+    #menu.open {
+      left: 0;
     }
 
-    @keyframes loading {
-      0% { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
-    }
-
-    /* [REST OF YOUR ORIGINAL CSS - ENHANCED] */
-    /* ... (keeping all your existing styles + adding premium effects) ... */
-
-    /* Premium Badge */
-    .premium-badge {
-      background: linear-gradient(135deg, var(--accent-gold), #f97316);
-      color: #000;
-      padding: 6px 16px;
-      border-radius: 50px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-    }
-
-    /* Infinite Scroll Loader */
-    .infinite-loader {
+    .menu-header {
       display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid var(--accent-blue);
+    }
+
+    .close-menu {
+      background: none;
+      border: none;
+      font-size: 28px;
+      cursor: pointer;
+      color: var(--text-secondary);
+    }
+
+    .menu-item {
+      padding: 12px 15px;
+      margin: 8px 0;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .menu-item:hover {
+      background: var(--bg-tertiary);
+      transform: translateX(5px);
+    }
+
+    /* Search Bar */
+    .search-container {
+      max-width: 600px;
+      margin: 0 auto 20px;
+      padding: 0 15px;
+    }
+
+    #search {
+      width: 100%;
+      padding: 14px 20px;
+      border-radius: 50px;
+      border: none;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      font-size: 1rem;
+      transition: var(--transition);
+      box-shadow: var(--shadow);
+    }
+
+    #search:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px var(--accent-blue);
+    }
+
+    /* Category Buttons */
+    .categories {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
       justify-content: center;
+      margin: 20px 0;
+      padding: 0 15px;
+    }
+
+    .category-btn {
+      padding: 10px 20px;
+      border-radius: 50px;
+      border: none;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: var(--transition);
+      font-weight: 500;
+    }
+
+    .category-btn.active {
+      background: var(--accent-blue);
+      color: white;
+      transform: scale(1.05);
+    }
+
+    .category-btn:hover {
+      transform: translateY(-2px);
+      background: var(--accent-blue);
+      color: white;
+    }
+
+    /* Refresh Button */
+    .refresh-btn {
+      display: block;
+      margin: 20px auto;
+      padding: 12px 30px;
+      background: linear-gradient(135deg, var(--accent-blue), #8b5cf6);
+      border: none;
+      border-radius: 50px;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+      transition: var(--transition);
+    }
+
+    .refresh-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+
+    /* News Cards */
+    .news-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .card {
+      background: var(--bg-secondary);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: var(--transition);
+      animation: fadeInUp 0.5s ease;
+      box-shadow: var(--shadow);
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.4);
+    }
+
+    .card img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      transition: var(--transition);
+    }
+
+    .card:hover img {
+      transform: scale(1.05);
+    }
+
+    .card-content {
+      padding: 20px;
+    }
+
+    .card h3 {
+      margin: 10px 0;
+      font-size: 1.2rem;
+    }
+
+    .card a {
+      color: var(--accent-blue);
+      text-decoration: none;
+      transition: var(--transition);
+    }
+
+    .card a:hover {
+      color: #3b82f6;
+      text-decoration: underline;
+    }
+
+    .source {
+      display: inline-block;
+      padding: 4px 12px;
+      background: var(--bg-tertiary);
+      border-radius: 20px;
+      font-size: 0.75rem;
+      color: var(--accent-green);
+      margin: 10px 0;
+    }
+
+    .save-btn {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 10px;
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: var(--transition);
+      font-weight: 500;
+    }
+
+    .save-btn:hover {
+      background: var(--accent-blue);
+      color: white;
+    }
+
+    .date {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      margin-top: 10px;
+    }
+
+    /* Loading Animation */
+    .loading {
+      text-align: center;
       padding: 40px;
     }
 
-    /* Voice Search Button */
-    .voice-btn {
-      position: fixed;
-      bottom: 30px;
-      right: 30px;
-      width: 60px;
-      height: 60px;
+    .loader {
+      width: 50px;
+      height: 50px;
+      border: 3px solid var(--bg-tertiary);
+      border-top-color: var(--accent-blue);
       border-radius: 50%;
-      background: var(--accent-gradient);
-      border: none;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--accent-green);
       color: white;
-      font-size: 24px;
-      cursor: pointer;
-      box-shadow: var(--shadow-glass);
-      z-index: 1000;
+      padding: 12px 24px;
+      border-radius: 50px;
+      z-index: 2000;
+      animation: slideIn 0.3s ease;
+      box-shadow: var(--shadow);
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    /* Footer */
+    footer {
+      margin-top: 50px;
+      padding: 30px 20px;
+      text-align: center;
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--bg-tertiary);
+    }
+
+    footer a {
+      color: var(--accent-blue);
+      text-decoration: none;
+      margin: 0 12px;
       transition: var(--transition);
     }
 
-    .voice-btn:hover {
-      transform: scale(1.1) rotate(10deg);
+    footer a:hover {
+      color: #3b82f6;
+      text-decoration: underline;
     }
-
-    .voice-btn.listening {
-      background: var(--accent-red);
-      animation: pulse 0.5s infinite;
-    }
-
-    /* Share Buttons */
-    .share-buttons {
-      display: flex;
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    .share-btn {
-      padding: 6px 12px;
-      border-radius: 20px;
-      border: none;
-      font-size: 0.8rem;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-
-    .whatsapp { background: #25D366; color: white; }
-    .telegram { background: #0088cc; color: white; }
-    .twitter { background: #1DA1F2; color: white; }
 
     /* Responsive */
     @media (max-width: 768px) {
       .news-grid {
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 16px;
-        padding: 12px;
+        grid-template-columns: 1fr;
+        padding: 15px;
       }
+      
+      .topbar {
+        padding: 10px 15px;
+      }
+      
+      .category-btn {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+      }
+    }
+
+    /* Premium Section */
+    .premium-badge {
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      color: #000;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: bold;
     }
   </style>
 </head>
 
-<body data-theme="dark">
-  <!-- Google Analytics 4 -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-XXXXXXXXXX');
-  </script>
-
-  <!-- Your existing HTML structure with ENHANCEMENTS -->
-  <div class="topbar glass">
+<body>
+  <div class="topbar">
     <div class="topbar-left">
       <button class="menu-btn" onclick="toggleMenu()">☰</button>
-      <h1>NewsHub <span class="premium-badge">PRO</span></h1>
+      <h1>NewsHub</h1>
     </div>
-    <div style="display: flex; gap: 10px;">
-      <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
-      <div id="notification-badge" style="background: var(--accent-red); width: 20px; height: 20px; border-radius: 50%; display: none; align-items: center; justify-content: center; font-size: 12px;">3</div>
+    <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+  </div>
+
+  <div id="menu">
+    <div class="menu-header">
+      <h2>Menu</h2>
+      <button class="close-menu" onclick="toggleMenu()">✕</button>
+    </div>
+    <div class="menu-item" onclick="showSection('home')">
+      <span>🏠</span> Home
+    </div>
+    <div class="menu-item" onclick="showSection('saved')">
+      <span>⭐</span> Saved News
+    </div>
+    <div class="menu-item" onclick="showSection('premium')">
+      <span>🔥</span> Premium News
     </div>
   </div>
 
-  <!-- Voice Search Button -->
-  <button class="voice-btn" onclick="startVoiceSearch()" id="voiceBtn">🎤</button>
-
-  <!-- Your existing sections with skeleton loading states -->
   <div id="homeSection">
-    <!-- Enhanced search with voice -->
-    <div class="search-container glass" style="margin: 20px;">
-      <div style="position: relative;">
-        <input type="text" id="search" placeholder="🔍 Search news or say 'latest news'...">
-        <button class="voice-btn" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); width: 40px; height: 40px;" onclick="startVoiceSearch()">🎤</button>
-      </div>
+    <div class="search-container">
+      <input type="text" id="search" placeholder="🔍 Search news articles..." oninput="debouncedSearch()">
     </div>
 
-    <!-- Your existing categories + trending -->
     <div class="categories">
       <button class="category-btn active" onclick="setCategory('all')">All</button>
-      <button class="category-btn" onclick="setCategory('trending')">🔥 Trending</button>
-      <!-- ... rest of categories ... -->
+      <button class="category-btn" onclick="setCategory('india')">🇮🇳 India</button>
+      <button class="category-btn" onclick="setCategory('defence')">⚔️ Defence</button>
+      <button class="category-btn" onclick="setCategory('world')">🌍 World</button>
+      <button class="category-btn" onclick="setCategory('technology')">💻 Tech</button>
+      <button class="category-btn" onclick="setCategory('sports')">⚽ Sports</button>
     </div>
 
-    <div id="news" class="news-grid"></div>
-    <div id="infiniteLoader" class="infinite-loader" style="display: none;">
-      <div class="loader"></div>
-    </div>
+    <button class="refresh-btn" onclick="fetchNews()">🔄 Refresh News</button>
+    <p id="last" style="text-align: center; font-size: 0.8rem;"></p>
+
+    <div id="news" class="news-grid">Loading...</div>
   </div>
 
-  <!-- Your existing saved/premium sections -->
+  <div id="savedSection" style="display:none;">
+    <h2 style="text-align: center; margin: 30px 0;">⭐ Your Saved News</h2>
+    <div id="saved" class="news-grid"></div>
+  </div>
 
-  <footer class="glass" style="margin-top: 60px;">
-    <p>© 2024 NewsHub Enterprise | <span id="userCount">10K+</span> users | Powered by AI</p>
+  <div id="premiumSection" style="display:none;">
+    <h2 style="text-align: center; margin: 30px 0;">🔥 Premium News</h2>
+    <div id="premium" class="news-grid"></div>
+  </div>
+
+  <footer>
+    <hr style="border-color: var(--bg-tertiary); margin-bottom: 20px;">
+    <p>
+      <a href="privacy.html">Privacy Policy</a> |
+      <a href="about.html">About Us</a> |
+      <a href="contact.html">Contact</a>
+    </p>
+    <p style="margin-top: 15px;">© 2024 NewsHub - Stay Informed</p>
   </footer>
 
-  <script src="script.js?v=3.0"></script>
+  <script src="script.js?v=2"></script>
 </body>
 </html>
