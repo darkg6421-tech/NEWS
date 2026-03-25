@@ -1,17 +1,268 @@
 <!DOCTYPE html>
-<html>
-<head><title>Privacy Policy</title></head>
-<body style="font-family:Arial; padding:20px;">
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy - NewsHub</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-<h1>Privacy Policy</h1>
+    :root {
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --text-primary: #f1f5f9;
+      --text-secondary: #cbd5e1;
+      --accent-blue: #60a5fa;
+      --accent-green: #22c55e;
+      --shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
 
-<p>This website collects basic user data such as browser type and usage behavior for improving user experience.</p>
+    [data-theme="light"] {
+      --bg-primary: #f8fafc;
+      --bg-secondary: #ffffff;
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+    }
 
-<p>We may use third-party services like Google AdSense which may use cookies to serve ads.</p>
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      transition: all 0.3s ease;
+    }
 
-<p>Users can disable cookies through their browser settings.</p>
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
 
-<p>We do not collect personal sensitive information.</p>
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid var(--accent-blue);
+    }
 
+    h1 {
+      font-size: 2.5rem;
+      background: linear-gradient(135deg, var(--accent-blue), #8b5cf6);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-bottom: 10px;
+    }
+
+    .last-updated {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    h2 {
+      color: var(--accent-blue);
+      margin: 30px 0 15px 0;
+      font-size: 1.5rem;
+    }
+
+    p {
+      margin-bottom: 15px;
+      color: var(--text-secondary);
+    }
+
+    .card {
+      background: var(--bg-secondary);
+      padding: 20px;
+      border-radius: 12px;
+      margin: 20px 0;
+      box-shadow: var(--shadow);
+    }
+
+    ul {
+      margin: 15px 0 15px 30px;
+      color: var(--text-secondary);
+    }
+
+    li {
+      margin: 8px 0;
+    }
+
+    .back-btn {
+      display: inline-block;
+      margin-top: 30px;
+      padding: 12px 30px;
+      background: linear-gradient(135deg, var(--accent-blue), #8b5cf6);
+      color: white;
+      text-decoration: none;
+      border-radius: 50px;
+      transition: transform 0.3s ease;
+    }
+
+    .back-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    footer {
+      margin-top: 50px;
+      text-align: center;
+      padding-top: 30px;
+      border-top: 1px solid var(--bg-secondary);
+      color: var(--text-secondary);
+    }
+
+    .theme-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--bg-secondary);
+      border: none;
+      font-size: 24px;
+      padding: 10px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      z-index: 100;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 20px;
+      }
+      
+      h1 {
+        font-size: 1.8rem;
+      }
+      
+      h2 {
+        font-size: 1.3rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+  
+  <div class="container">
+    <div class="header">
+      <h1>Privacy Policy</h1>
+      <p class="last-updated">Last Updated: January 2024</p>
+    </div>
+
+    <div class="card">
+      <h2>📋 Information We Collect</h2>
+      <p>NewsHub respects your privacy and is committed to protecting your personal data. We collect minimal information to provide you with the best news experience:</p>
+      <ul>
+        <li><strong>Usage Data:</strong> Basic analytics about how you interact with our app (pages visited, features used)</li>
+        <li><strong>Device Information:</strong> Browser type, device type, and operating system for optimization</li>
+        <li><strong>Saved Articles:</strong> Articles you choose to save are stored locally on your device</li>
+        <li><strong>Preferences:</strong> Your theme preference and category selections</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>🔒 How We Use Your Information</h2>
+      <ul>
+        <li>To provide and maintain our news service</li>
+        <li>To personalize your news feed based on your interests</li>
+        <li>To improve and optimize our application performance</li>
+        <li>To remember your preferences and saved articles</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>📱 Local Storage & Data</h2>
+      <p>All your saved articles, preferences, and settings are stored locally on your device using your browser's localStorage. We do not upload this data to any server. This means:</p>
+      <ul>
+        <li>Your saved articles remain private to your device</li>
+        <li>Clearing your browser data will remove your saved articles</li>
+        <li>We cannot access your saved articles remotely</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>🍪 Cookies & Tracking</h2>
+      <p>We use minimal cookies to enhance your experience:</p>
+      <ul>
+        <li><strong>Essential Cookies:</strong> Required for core functionality (theme preference)</li>
+        <li><strong>Analytics:</strong> Basic usage statistics to improve our service</li>
+      </ul>
+      <p>You can disable cookies in your browser settings, but some features may not function properly.</p>
+    </div>
+
+    <div class="card">
+      <h2>🔗 Third-Party Services</h2>
+      <p>Our app integrates with the following third-party services:</p>
+      <ul>
+        <li><strong>News API:</strong> We fetch news from Google News RSS feed. Please review <a href="https://policies.google.com/privacy" target="_blank" style="color: var(--accent-blue);">Google's Privacy Policy</a></li>
+        <li><strong>External Links:</strong> News articles link to external websites. We are not responsible for their privacy practices</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>👶 Children's Privacy</h2>
+      <p>Our service is intended for general audiences. We do not knowingly collect personal information from children under 13. If you believe we have inadvertently collected such information, please contact us.</p>
+    </div>
+
+    <div class="card">
+      <h2>🛡️ Data Security</h2>
+      <p>We implement appropriate security measures to protect your data:</p>
+      <ul>
+        <li>All data is stored locally on your device</li>
+        <li>No personal information is transmitted to our servers</li>
+        <li>Regular security updates and best practices</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>📧 Contact Us</h2>
+      <p>If you have questions about this Privacy Policy or our practices, please contact us:</p>
+      <ul>
+        <li>Email: privacy@newshub.com</li>
+        <li>Through our <a href="contact.html" style="color: var(--accent-blue);">Contact Form</a></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>⚖️ Your Rights</h2>
+      <p>You have the right to:</p>
+      <ul>
+        <li>Access your stored data (check browser's localStorage)</li>
+        <li>Delete your saved articles (use the app's remove feature)</li>
+        <li>Opt-out of analytics (disable in settings)</li>
+        <li>Clear all data by clearing browser storage</li>
+      </ul>
+    </div>
+
+    <div style="text-align: center;">
+      <a href="index.html" class="back-btn">← Back to NewsHub</a>
+    </div>
+
+    <footer>
+      <p>© 2024 NewsHub - All Rights Reserved</p>
+      <p style="font-size: 0.8rem;">This privacy policy is effective immediately and will be updated as needed</p>
+    </footer>
+  </div>
+
+  <script>
+    // Theme toggle for privacy page
+    function toggleTheme() {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+    }
+
+    // Load saved theme
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    } else if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
+  </script>
 </body>
 </html>
