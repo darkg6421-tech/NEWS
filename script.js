@@ -1,19 +1,13 @@
 // ============================================
-// NewsHub - Working Version with GNews API
+// NewsHub - RSS Direct with Working Images
 // ============================================
 
-// Global Variables
 let currentCategory = 'all';
 let allNewsItems = [];
 let isLoading = false;
 let searchTimeout = null;
 let currentSection = 'home';
 
-// GNews API with your key
-const API_KEY = '97ad9f7fc4a7d7e29611ee9858eb48bb';
-const BASE_URL = 'https://gnews.io/api/v4/search';
-
-// DOM Elements
 const menu = document.getElementById('menu');
 const newsContainer = document.getElementById('news');
 const savedContainer = document.getElementById('saved');
@@ -22,7 +16,7 @@ const lastUpdatedSpan = document.getElementById('last');
 const searchInput = document.getElementById('search');
 
 // ============================================
-// Initialize App
+// Initialize
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
   loadTheme();
@@ -35,155 +29,122 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
   
-  setInterval(() => {
-    fetchNews();
-  }, 180000);
+  setInterval(() => fetchNews(), 300000);
 });
 
 // ============================================
-// Fetch News from GNews API
+// Fetch News from RSS (Working)
 // ============================================
 async function fetchNews() {
   if (isLoading) return;
-  
   isLoading = true;
   showLoading(newsContainer);
   
   try {
-    let query = 'india news';
-    let country = 'in';
+    let rssUrl = 'https://news.google.com/rss?hl=en-IN&gl=IN&ceid=IN:en';
     
     if (currentCategory === 'india') {
-      query = 'india news latest';
+      rssUrl = 'https://news.google.com/rss/search?q=india&hl=en-IN&gl=IN&ceid=IN:en';
     } else if (currentCategory === 'defence') {
-      query = 'defence army military';
+      rssUrl = 'https://news.google.com/rss/search?q=defence+army+military&hl=en-IN&gl=IN&ceid=IN:en';
     } else if (currentCategory === 'world') {
-      query = 'world international news';
+      rssUrl = 'https://news.google.com/rss?hl=en-IN&gl=IN&ceid=IN:en';
     } else if (currentCategory === 'technology') {
-      query = 'technology tech';
+      rssUrl = 'https://news.google.com/rss/search?q=technology&hl=en-IN&gl=IN&ceid=IN:en';
     } else if (currentCategory === 'sports') {
-      query = 'sports cricket';
-    } else {
-      query = 'india latest news';
+      rssUrl = 'https://news.google.com/rss/search?q=sports+cricket&hl=en-IN&gl=IN&ceid=IN:en';
     }
     
-    const url = `${BASE_URL}?q=${encodeURIComponent(query)}&lang=en&country=${country}&max=20&sortby=publishedAt&apikey=${API_KEY}`;
+    const url = "https://api.rss2json.com/v1/api.json?rss_url=" + encodeURIComponent(rssUrl) + "&t=" + new Date().getTime();
     
-    console.log('Fetching news...');
-    
-    const response = await fetchWithTimeout(url, 10000);
+    const response = await fetch(url);
     const data = await response.json();
     
-    if (data && data.articles && data.articles.length > 0) {
-      allNewsItems = data.articles.map((article) => ({
-        title: article.title,
-        description: article.description || getDescriptionFromTitle(article.title),
-        source: article.source?.name || "News Source",
-        thumbnail: article.image || getFallbackImage(),
-        link: article.url,
-        pubDate: new Date(article.publishedAt)
-      }));
+    if (data && data.items && data.items.length > 0) {
+      allNewsItems = data.items.map(item => {
+        let cleanTitle = item.title;
+        let source = "News Source";
+        
+        if (item.title.includes(" - ")) {
+          const parts = item.title.split(" - ");
+          cleanTitle = parts[0];
+          source = parts[1];
+        }
+        
+        // Extract image from description
+        let imageUrl = item.thumbnail || getImageFromDescription(item.description);
+        
+        return {
+          title: cleanTitle,
+          source: source,
+          thumbnail: imageUrl,
+          link: item.link,
+          description: generateDescription(cleanTitle),
+          pubDate: new Date(item.pubDate)
+        };
+      });
       
       renderNews();
       updateLastUpdated();
       showToast(`✅ ${allNewsItems.length} news loaded`);
     } else {
-      await fetchNewsRSS();
+      throw new Error('No news');
     }
     
   } catch (error) {
-    console.error('API Error:', error);
-    await fetchNewsRSS();
+    console.error('Error:', error);
+    showError(newsContainer, 'Failed to load news');
   } finally {
     isLoading = false;
   }
 }
 
 // ============================================
-// Fallback: RSS Feed
+// Extract image from description
 // ============================================
-async function fetchNewsRSS() {
-  try {
-    const response = await fetchWithTimeout(
-      "https://api.rss2json.com/v1/api.json?rss_url=" +
-      encodeURIComponent("https://news.google.com/rss?hl=en-IN&gl=IN&ceid=IN:en") +
-      "&t=" + new Date().getTime(),
-      10000
-    );
-    
-    const data = await response.json();
-    
-    if (data && data.items && data.items.length > 0) {
-      allNewsItems = data.items.map(item => ({
-        title: item.title.split(" - ")[0],
-        description: getDescriptionFromTitle(item.title.split(" - ")[0]),
-        source: item.title.split(" - ")[1] || "News Source",
-        thumbnail: item.thumbnail || getFallbackImage(),
-        link: item.link,
-        pubDate: new Date(item.pubDate)
-      }));
-      
-      renderNews();
-      updateLastUpdated();
-      showToast(`📰 ${allNewsItems.length} news (RSS)`);
-    } else {
-      throw new Error('No news');
-    }
-    
-  } catch (error) {
-    console.error('RSS Error:', error);
-    showError(newsContainer, 'Failed to load news');
-    
-    const cachedNews = localStorage.getItem('cachedNews');
-    if (cachedNews) {
-      allNewsItems = JSON.parse(cachedNews);
-      renderNews();
-      showToast('📱 Offline mode');
-    }
-  }
-}
-
-function fetchWithTimeout(url, timeout) {
-  return Promise.race([
-    fetch(url),
-    new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), timeout))
-  ]);
-}
-
-// ============================================
-// Generate Real Description from Title
-// ============================================
-function getDescriptionFromTitle(title) {
-  // Extract keywords from title to make relevant summary
-  const keywords = title.toLowerCase();
+function getImageFromDescription(description) {
+  if (!description) return getFallbackImage();
   
-  if (keywords.includes('war') || keywords.includes('attack') || keywords.includes('strike')) {
-    return `⚡ Breaking: ${title}. This conflict situation is developing. Military sources report ongoing operations. Casualty figures are being verified. International community is closely monitoring the situation. Stay tuned for live updates.`;
+  const imgMatch = description.match(/<img[^>]+src="([^">]+)"/);
+  if (imgMatch && imgMatch[1]) {
+    return imgMatch[1];
   }
   
-  if (keywords.includes('india') || keywords.includes('modi') || keywords.includes('bjp') || keywords.includes('congress')) {
-    return `🇮🇳 ${title}. This political development affects India's domestic landscape. Key political figures are responding. The story has implications for governance and policy. Read the full article for detailed analysis.`;
-  }
-  
-  if (keywords.includes('cricket') || keywords.includes('sport') || keywords.includes('match')) {
-    return `🏏 ${title}. Exciting sports action unfolds as teams compete. Key moments from the game include strategic plays and outstanding performances. Fans are eagerly following this sporting event. Get complete match coverage here.`;
-  }
-  
-  if (keywords.includes('tech') || keywords.includes('ai') || keywords.includes('phone')) {
-    return `💻 ${title}. Technology sector updates bring new innovations. Industry experts share insights on how this development impacts consumers. The tech landscape continues to evolve rapidly. Read more for detailed coverage.`;
-  }
-  
-  return `📰 ${title}. Stay informed with the latest developments on this important story. Our team brings you accurate and timely coverage of events as they unfold. Click to read the complete article for full details.`;
+  return getFallbackImage();
 }
 
 function getFallbackImage() {
-  return 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=400&h=200&fit=crop';
+  return 'https://picsum.photos/400/200?random=' + Math.random();
+}
+
+// ============================================
+// Generate meaningful description
+// ============================================
+function generateDescription(title) {
+  const lowerTitle = title.toLowerCase();
+  
+  if (lowerTitle.includes('war') || lowerTitle.includes('attack') || lowerTitle.includes('strike')) {
+    return `🔴 BREAKING: ${title}. Tensions escalate as military operations continue. Officials are monitoring the situation closely. International response is being coordinated. Stay tuned for live updates on this developing story.`;
+  }
+  
+  if (lowerTitle.includes('india') || lowerTitle.includes('modi') || lowerTitle.includes('bjp') || lowerTitle.includes('congress')) {
+    return `🇮🇳 ${title}. This political development has significant implications. Key political figures have responded. The story is evolving with new details emerging. Read the full coverage for complete analysis.`;
+  }
+  
+  if (lowerTitle.includes('cricket') || lowerTitle.includes('sport') || lowerTitle.includes('match') || lowerTitle.includes('ipl')) {
+    return `🏏 ${title}. Exciting sports action unfolds as teams compete. Key moments include strategic plays and outstanding individual performances. Fans are eagerly following this sporting event. Get complete match highlights here.`;
+  }
+  
+  if (lowerTitle.includes('tech') || lowerTitle.includes('ai') || lowerTitle.includes('phone') || lowerTitle.includes('app')) {
+    return `💻 ${title}. Technology sector sees major developments. Industry experts share insights on how this impacts consumers and businesses. The tech landscape continues to evolve rapidly. Read more for detailed coverage.`;
+  }
+  
+  return `📰 ${title}. Stay informed with the latest developments on this important story. Our team brings you accurate and timely coverage of events as they unfold. Click to read the complete article for full details and expert analysis.`;
 }
 
 function calculateReadTime(description) {
   const words = description.split(' ').length;
-  const minutes = Math.max(1, Math.ceil(words / 200));
-  return minutes;
+  return Math.max(1, Math.ceil(words / 200));
 }
 
 // ============================================
@@ -208,24 +169,24 @@ function renderNews() {
   });
   
   if (filteredNews.length === 0) {
-    newsContainer.innerHTML = `<div style="text-align:center;padding:40px;"><p>😕 No news found</p><button onclick="fetchNews()" style="padding:10px 20px;background:var(--accent-blue);border:none;border-radius:10px;cursor:pointer;">Refresh</button></div>`;
+    newsContainer.innerHTML = `<div style="text-align:center;padding:40px;"><p>😕 No news found</p><button onclick="fetchNews()" style="padding:10px 20px;background:#60a5fa;border:none;border-radius:10px;cursor:pointer;">Refresh</button></div>`;
     return;
   }
   
   localStorage.setItem('cachedNews', JSON.stringify(filteredNews.slice(0, 50)));
   
   newsContainer.innerHTML = filteredNews.map(item => {
-    const description = item.description || getDescriptionFromTitle(item.title);
+    const description = item.description || generateDescription(item.title);
     const readTime = calculateReadTime(description);
     const isSaved = isNewsSaved(item.link);
-    const saveButtonText = isSaved ? '❌ Remove' : '⭐ Save';
+    const saveText = isSaved ? '❌ Remove' : '⭐ Save';
     
     return `
       <div class="card">
         <img src="${item.thumbnail}" 
              alt="${escapeHtml(item.title)}"
              loading="lazy"
-             onerror="this.src='${getFallbackImage()}'">
+             onerror="this.src='https://picsum.photos/400/200?random=${Math.random()}'">
         <div class="card-content">
           <div class="meta-info">
             <span class="read-time">⏱️ ${readTime} min read</span>
@@ -236,7 +197,7 @@ function renderNews() {
             📖 ${escapeHtml(description)}
           </div>
           <button class="save-btn" onclick="toggleSave('${escapeHtml(item.link)}', \`${escapeHtml(item.title)}\`, '${escapeHtml(item.source)}', '${escapeHtml(item.thumbnail)}', \`${escapeHtml(description)}\`, ${readTime})">
-            ${saveButtonText}
+            ${saveText}
           </button>
           <div class="date">📅 ${formatDate(item.pubDate)}</div>
         </div>
@@ -246,25 +207,23 @@ function renderNews() {
 }
 
 // ============================================
-// Theme Functions
+// Theme
 // ============================================
 function toggleTheme() {
-  const currentTheme = document.documentElement.getAttribute('data-theme');
-  const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+  const current = document.documentElement.getAttribute('data-theme');
+  const newTheme = current === 'light' ? 'dark' : 'light';
   document.documentElement.setAttribute('data-theme', newTheme);
   localStorage.setItem('theme', newTheme);
   showToast(`🌓 ${newTheme === 'light' ? 'Light' : 'Dark'} mode`);
 }
 
 function loadTheme() {
-  const savedTheme = localStorage.getItem('theme');
-  if (savedTheme) {
-    document.documentElement.setAttribute('data-theme', savedTheme);
-  }
+  const saved = localStorage.getItem('theme');
+  if (saved) document.documentElement.setAttribute('data-theme', saved);
 }
 
 // ============================================
-// Menu Functions
+// Menu
 // ============================================
 function toggleMenu() {
   menu.classList.toggle('open');
@@ -335,7 +294,7 @@ function loadSavedNews() {
           <span class="source">📰 ${escapeHtml(item.source || 'News')}</span>
         </div>
         <h3><a href="${item.link}" target="_blank">${escapeHtml(item.title)}</a></h3>
-        <div class="news-summary">📖 ${escapeHtml(item.description || getDescriptionFromTitle(item.title))}</div>
+        <div class="news-summary">📖 ${escapeHtml(item.description || generateDescription(item.title))}</div>
         <button class="save-btn" onclick="toggleSave('${escapeHtml(item.link)}', \`${escapeHtml(item.title)}\`, '${escapeHtml(item.source)}', '${escapeHtml(item.thumbnail)}', \`${escapeHtml(item.description)}\`, ${item.readTime})">❌ Remove</button>
         <div class="date">📅 Saved on ${formatDate(new Date(item.savedAt))}</div>
       </div>
@@ -349,17 +308,17 @@ function isNewsSaved(link) {
 }
 
 // ============================================
-// Premium Section
+// Premium
 // ============================================
 function loadPremiumNews() {
   if (!premiumContainer) return;
   premiumContainer.innerHTML = `
-    <div class="card"><div class="card-content"><h3>🔥 Premium Content Coming Soon</h3><p>Exclusive news, deep analysis, and more.</p><button class="save-btn" onclick="showToast('🔒 Coming soon')">Notify Me</button></div></div>
+    <div class="card"><div class="card-content"><h3>🔥 Premium Content</h3><p>Exclusive news, deep analysis, and more coming soon.</p><button class="save-btn" onclick="showToast('🔒 Coming soon')">Notify Me</button></div></div>
   `;
 }
 
 // ============================================
-// Utility Functions
+// Utilities
 // ============================================
 function debouncedSearch() {
   clearTimeout(searchTimeout);
@@ -395,12 +354,12 @@ function showLoading(container) {
 }
 
 function showError(container, message) {
-  container.innerHTML = `<div style="text-align:center;padding:40px;"><p>⚠️ ${message}</p><button onclick="fetchNews()" style="padding:10px 20px;background:var(--accent-blue);border:none;border-radius:10px;cursor:pointer;">Retry</button></div>`;
+  container.innerHTML = `<div style="text-align:center;padding:40px;"><p>⚠️ ${message}</p><button onclick="fetchNews()" style="padding:10px 20px;background:#60a5fa;border:none;border-radius:10px;cursor:pointer;">Retry</button></div>`;
 }
 
 function showToast(message) {
-  const existingToast = document.querySelector('.toast');
-  if (existingToast) existingToast.remove();
+  const existing = document.querySelector('.toast');
+  if (existing) existing.remove();
   const toast = document.createElement('div');
   toast.className = 'toast';
   toast.textContent = message;
@@ -421,7 +380,7 @@ function escapeHtml(str) {
   });
 }
 
-// Make functions global
+// Make global
 window.toggleMenu = toggleMenu;
 window.showSection = showSection;
 window.setCategory = setCategory;
