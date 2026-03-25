@@ -1,7 +1,7 @@
 // ============================================
-// NewsHub - Advanced News Application
-// Version: 2.0.0
-// Features: Dark/Light Mode, Offline Support, Premium Content
+// NewsHub Premium - Advanced News Application
+// Version: 3.0.0 - Premium Edition
+// Features: AI Summary, Trending, Keyboard Shortcuts, Newsletter
 // ============================================
 
 // Global Variables
@@ -10,6 +10,8 @@ let allNewsItems = [];
 let isLoading = false;
 let searchTimeout = null;
 let currentSection = 'home';
+let newsSummaries = new Map(); // Cache for summaries
+let trendingStories = [];
 
 // ============================================
 // DOM Elements
@@ -17,6 +19,7 @@ let currentSection = 'home';
 const menu = document.getElementById('menu');
 const newsContainer = document.getElementById('news');
 const savedContainer = document.getElementById('saved');
+const trendingContainer = document.getElementById('trending');
 const premiumContainer = document.getElementById('premium');
 const lastUpdatedSpan = document.getElementById('last');
 const searchInput = document.getElementById('search');
@@ -28,7 +31,10 @@ document.addEventListener('DOMContentLoaded', () => {
   loadTheme();
   fetchNews();
   loadSavedNews();
+  loadTrendingNews();
   setupServiceWorker();
+  setupKeyboardShortcuts();
+  showNewsletterPopup();
   
   // Close menu when clicking outside
   document.addEventListener('click', (e) => {
@@ -37,6 +43,43 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+// ============================================
+// Keyboard Shortcuts
+// ============================================
+function setupKeyboardShortcuts() {
+  document.addEventListener('keydown', (e) => {
+    // Press 'S' or '/' to focus search
+    if (e.key === 's' || e.key === 'S' || e.key === '/') {
+      e.preventDefault();
+      if (searchInput) {
+        searchInput.focus();
+        showToast('🔍 Search mode activated');
+      }
+    }
+    
+    // Press 'D' for dark mode
+    if (e.key === 'd' || e.key === 'D') {
+      e.preventDefault();
+      toggleTheme();
+    }
+    
+    // Press '?' for help
+    if (e.key === '?' || (e.shiftKey && e.key === '/')) {
+      e.preventDefault();
+      showKeyboardHelp();
+    }
+    
+    // Press 'ESC' to close menu
+    if (e.key === 'Escape' && menu.classList.contains('open')) {
+      toggleMenu();
+    }
+  });
+}
+
+function showKeyboardHelp() {
+  showToast('⌨️ Shortcuts: S=Search | D=Dark Mode | ESC=Close Menu');
+}
 
 // ============================================
 // Theme Management
@@ -71,6 +114,7 @@ function showSection(section) {
   // Hide all sections
   document.getElementById('homeSection').style.display = 'none';
   document.getElementById('savedSection').style.display = 'none';
+  document.getElementById('trendingSection').style.display = 'none';
   document.getElementById('premiumSection').style.display = 'none';
   
   // Show selected section
@@ -79,6 +123,9 @@ function showSection(section) {
   } else if (section === 'saved') {
     document.getElementById('savedSection').style.display = 'block';
     loadSavedNews();
+  } else if (section === 'trending') {
+    document.getElementById('trendingSection').style.display = 'block';
+    loadTrendingNews();
   } else if (section === 'premium') {
     document.getElementById('premiumSection').style.display = 'block';
     loadPremiumNews();
@@ -86,16 +133,6 @@ function showSection(section) {
   
   // Close menu
   menu.classList.remove('open');
-  
-  // Update active state in menu (if needed)
-  updateActiveMenu(section);
-}
-
-function updateActiveMenu(section) {
-  const menuItems = document.querySelectorAll('.menu-item');
-  menuItems.forEach(item => {
-    item.style.background = '';
-  });
 }
 
 // ============================================
@@ -107,7 +144,7 @@ function setCategory(category) {
   // Update active button styles
   document.querySelectorAll('.category-btn').forEach(btn => {
     btn.classList.remove('active');
-    if (btn.textContent.trim().toLowerCase() === category || 
+    if (btn.textContent.trim().toLowerCase().includes(category) || 
         (category === 'all' && btn.textContent === 'All')) {
       btn.classList.add('active');
     }
@@ -123,7 +160,7 @@ async function fetchNews() {
   if (isLoading) return;
   
   isLoading = true;
-  showLoading(newsContainer);
+  showSkeletonLoading(newsContainer);
   
   try {
     const response = await fetchWithTimeout(
@@ -136,17 +173,27 @@ async function fetchNews() {
     const data = await response.json();
     
     if (data && data.items && data.items.length > 0) {
-      allNewsItems = data.items.map(item => ({
+      allNewsItems = data.items.map((item, index) => ({
         ...item,
+        id: index,
         cleanTitle: item.title.split(" - ")[0],
         source: item.title.split(" - ")[1] || "News Source",
         thumbnail: item.thumbnail || getFallbackImage(),
-        pubDate: new Date(item.pubDate)
+        pubDate: new Date(item.pubDate),
+        description: item.description || item.content || item.cleanTitle,
+        readingTime: calculateReadingTime(item.cleanTitle),
+        isTrending: index < 5 // First 5 are trending
       }));
+      
+      // Update breaking ticker
+      updateBreakingTicker(allNewsItems.slice(0, 5));
       
       renderNews();
       updateLastUpdated();
       showToast(`✅ Loaded ${allNewsItems.length} news articles`);
+      
+      // Cache for offline
+      localStorage.setItem('cachedNews', JSON.stringify(allNewsItems));
     } else {
       throw new Error('No news found');
     }
@@ -177,7 +224,108 @@ function fetchWithTimeout(url, timeout) {
 }
 
 function getFallbackImage() {
-  return 'https://via.placeholder.com/400x200/1e293b/60a5fa?text=News';
+  return 'https://via.placeholder.com/400x200/1e293b/60a5fa?text=NewsHub+Premium';
+}
+
+// ============================================
+// Calculate Reading Time
+// ============================================
+function calculateReadingTime(text) {
+  const wordsPerMinute = 200;
+  const wordCount = (text || '').split(/\s+/).length;
+  const minutes = Math.ceil(wordCount / wordsPerMinute);
+  return Math.max(1, minutes);
+}
+
+// ============================================
+// AI-Powered Summary Generator
+// ============================================
+function generateSummary(text, title) {
+  // Intelligent summary generation without external API
+  // This simulates AI summarization with smart extraction
+  
+  if (newsSummaries.has(title)) {
+    return newsSummaries.get(title);
+  }
+  
+  let summary = '';
+  
+  // Clean the text
+  const cleanText = text.replace(/[^\w\s]/g, '').toLowerCase();
+  const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 30);
+  
+  if (sentences.length >= 3) {
+    // Extract key sentences based on keyword importance
+    const keywords = extractKeywords(title);
+    const scoredSentences = sentences.map(sentence => ({
+      text: sentence,
+      score: calculateSentenceScore(sentence, keywords)
+    }));
+    
+    // Get top 2-3 sentences
+    const topSentences = scoredSentences
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 2)
+      .map(s => s.text.trim());
+    
+    summary = topSentences.join('. ') + '.';
+  } else {
+    // Fallback summary
+    summary = title + '. ' + (text.substring(0, 150) || 'Read the full article for more details.');
+  }
+  
+  // Ensure summary isn't too long
+  if (summary.length > 250) {
+    summary = summary.substring(0, 250) + '...';
+  }
+  
+  newsSummaries.set(title, summary);
+  return summary;
+}
+
+function extractKeywords(text) {
+  // Extract important keywords from title
+  const stopWords = ['a', 'an', 'and', 'are', 'as', 'at', 'be', 'but', 'by', 'for', 'in', 'is', 'it', 'of', 'on', 'or', 'the', 'to'];
+  const words = text.toLowerCase().split(/\s+/);
+  return words.filter(word => word.length > 3 && !stopWords.includes(word));
+}
+
+function calculateSentenceScore(sentence, keywords) {
+  let score = 0;
+  const words = sentence.toLowerCase().split(/\s+/);
+  
+  // Score based on keyword presence
+  keywords.forEach(keyword => {
+    if (sentence.toLowerCase().includes(keyword)) {
+      score += 2;
+    }
+  });
+  
+  // Longer sentences often contain more information
+  score += Math.min(words.length / 10, 3);
+  
+  // Sentences with numbers or percentages are often important
+  if (/\d+/.test(sentence)) score += 1;
+  if(/[%\$]/.test(sentence)) score += 1;
+  
+  return score;
+}
+
+// ============================================
+// Update Breaking News Ticker
+// ============================================
+function updateBreakingTicker(newsItems) {
+  const tickerContent = document.getElementById('tickerContent');
+  if (!tickerContent) return;
+  
+  const tickerHTML = newsItems.map(item => `
+    <span class="ticker-item">
+      <span class="ticker-badge">🔴 ${item.isTrending ? 'BREAKING' : 'LATEST'}</span>
+      ${escapeHtml(item.cleanTitle.substring(0, 80))}
+    </span>
+  `).join('');
+  
+  tickerContent.innerHTML = tickerHTML + tickerHTML; // Duplicate for seamless loop
 }
 
 // ============================================
@@ -194,9 +342,10 @@ function renderNews() {
       const title = item.cleanTitle.toLowerCase();
       if (currentCategory === 'india' && !title.includes('india')) return false;
       if (currentCategory === 'defence' && !(title.includes('army') || title.includes('defence') || title.includes('war') || title.includes('military'))) return false;
-      if (currentCategory === 'world' && !(title.includes('world') || title.includes('international') || title.includes('us') || title.includes('china') || title.includes('russia'))) return false;
-      if (currentCategory === 'technology' && !(title.includes('tech') || title.includes('ai') || title.includes('digital') || title.includes('software'))) return false;
+      if (currentCategory === 'world' && !(title.includes('world') || title.includes('international') || title.includes('us') || title.includes('china'))) return false;
+      if (currentCategory === 'technology' && !(title.includes('tech') || title.includes('ai') || title.includes('digital') || title.includes('software') || title.includes('app'))) return false;
       if (currentCategory === 'sports' && !(title.includes('sport') || title.includes('cricket') || title.includes('football') || title.includes('match'))) return false;
+      if (currentCategory === 'business' && !(title.includes('business') || title.includes('market') || title.includes('economy') || title.includes('stock'))) return false;
     }
     
     // Search filter
@@ -207,9 +356,10 @@ function renderNews() {
   
   if (filteredNews.length === 0) {
     newsContainer.innerHTML = `
-      <div style="text-align: center; padding: 40px;">
-        <p>😕 No news found matching your criteria</p>
-        <button onclick="fetchNews()" style="margin-top: 20px; padding: 10px 20px; background: var(--accent-blue); border: none; border-radius: 10px; cursor: pointer;">Refresh</button>
+      <div style="text-align: center; padding: 60px;">
+        <p style="font-size: 3rem;">😕</p>
+        <p style="font-size: 1.2rem; margin-top: 20px;">No news found matching your criteria</p>
+        <button onclick="fetchNews()" style="margin-top: 20px; padding: 12px 24px; background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple)); border: none; border-radius: 10px; cursor: pointer; color: white;">Refresh</button>
       </div>
     `;
     return;
@@ -218,8 +368,8 @@ function renderNews() {
   // Cache news for offline use
   localStorage.setItem('cachedNews', JSON.stringify(filteredNews.slice(0, 50)));
   
-  // Render cards
-  newsContainer.innerHTML = filteredNews.map(item => createNewsCard(item)).join('');
+  // Render cards with animation
+  newsContainer.innerHTML = filteredNews.map((item, idx) => createNewsCard(item, idx)).join('');
   
   // Add animation to cards
   document.querySelectorAll('.card').forEach((card, index) => {
@@ -227,33 +377,94 @@ function renderNews() {
   });
 }
 
-function createNewsCard(item) {
+function createNewsCard(item, index) {
   const isSaved = isNewsSaved(item.link);
   const saveButtonText = isSaved ? '❌ Remove' : '⭐ Save';
-  const saveButtonClass = isSaved ? 'save-btn remove' : 'save-btn';
+  const saveButtonClass = isSaved ? 'action-btn save-btn' : 'action-btn';
+  const summary = generateSummary(item.description || item.cleanTitle, item.cleanTitle);
   
   return `
-    <div class="card">
-      <img src="${item.thumbnail || getFallbackImage()}" 
-           alt="${escapeHtml(item.cleanTitle)}"
-           loading="lazy"
-           onerror="this.src='${getFallbackImage()}'">
+    <div class="card" data-id="${item.id}">
+      <div class="card-img">
+        <img src="${item.thumbnail || getFallbackImage()}" 
+             alt="${escapeHtml(item.cleanTitle)}"
+             loading="lazy"
+             onerror="this.src='${getFallbackImage()}'">
+        <div class="reading-time">📖 ${item.readingTime} min read</div>
+      </div>
       <div class="card-content">
-        <span class="source">📰 ${escapeHtml(item.source)}</span>
+        <div class="card-header">
+          <span class="source">📰 ${escapeHtml(item.source)}</span>
+          ${item.isTrending ? '<span class="trending-indicator">🔥 Trending</span>' : ''}
+        </div>
         <h3><a href="${item.link}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.cleanTitle)}</a></h3>
-        <button class="${saveButtonClass}" onclick="toggleSave('${escapeHtml(item.link)}', \`${escapeHtml(item.cleanTitle)}\`, '${escapeHtml(item.source)}', '${escapeHtml(item.thumbnail || '')}')">
-          ${saveButtonText}
-        </button>
+        
+        <!-- AI Summary Section -->
+        <div class="summary-section">
+          <div class="summary-header">
+            <span>🤖 AI Summary</span>
+            <button class="generate-summary-btn" onclick="regenerateSummary('${item.id}', '${escapeHtml(item.cleanTitle)}', \`${escapeHtml(item.description || item.cleanTitle)}\`)">
+              🔄 Refresh
+            </button>
+          </div>
+          <div class="summary-text" id="summary-${item.id}">
+            ${escapeHtml(summary)}
+          </div>
+        </div>
+        
+        <div class="action-buttons">
+          <button class="action-btn" onclick="shareArticle('${escapeHtml(item.link)}', '${escapeHtml(item.cleanTitle)}')">
+            📤 Share
+          </button>
+          <button class="${saveButtonClass}" onclick="toggleSave('${escapeHtml(item.link)}', \`${escapeHtml(item.cleanTitle)}\`, '${escapeHtml(item.source)}', '${escapeHtml(item.thumbnail || '')}', '${item.description || ''}')">
+            ${saveButtonText}
+          </button>
+        </div>
         <div class="date">📅 ${formatDate(item.pubDate)}</div>
       </div>
     </div>
   `;
 }
 
+// Regenerate summary for specific article
+function regenerateSummary(id, title, description) {
+  newsSummaries.delete(title);
+  const newSummary = generateSummary(description, title);
+  const summaryDiv = document.getElementById(`summary-${id}`);
+  if (summaryDiv) {
+    summaryDiv.textContent = newSummary;
+    showToast('✨ Summary regenerated');
+  }
+}
+
+// ============================================
+// Share Article
+// ============================================
+function shareArticle(url, title) {
+  if (navigator.share) {
+    navigator.share({
+      title: title,
+      url: url
+    }).catch(() => {
+      copyToClipboard(url);
+    });
+  } else {
+    copyToClipboard(url);
+  }
+}
+
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('🔗 Link copied to clipboard!');
+  }).catch(() => {
+    showToast('⚠️ Could not copy link');
+  });
+}
+
 // ============================================
 // Save/Load Saved News
 // ============================================
-function toggleSave(link, title, source, thumbnail) {
+function toggleSave(link, title, source, thumbnail, description) {
   let saved = JSON.parse(localStorage.getItem('savedNews')) || [];
   const exists = saved.find(item => item.link === link);
   
@@ -261,7 +472,14 @@ function toggleSave(link, title, source, thumbnail) {
     saved = saved.filter(item => item.link !== link);
     showToast(`❌ Removed from saved`);
   } else {
-    saved.push({ link, title, source, thumbnail, savedAt: new Date().toISOString() });
+    saved.push({ 
+      link, 
+      title, 
+      source, 
+      thumbnail, 
+      description,
+      savedAt: new Date().toISOString() 
+    });
     showToast(`⭐ Saved to bookmarks`);
   }
   
@@ -272,11 +490,10 @@ function toggleSave(link, title, source, thumbnail) {
     loadSavedNews();
   } else {
     // Update button in current view
-    const buttons = document.querySelectorAll('.save-btn');
+    const buttons = document.querySelectorAll('.action-btn');
     buttons.forEach(btn => {
-      if (btn.textContent.includes('Save') && btn.parentElement.querySelector('a')?.href === link) {
+      if (btn.textContent.includes('Save') && btn.parentElement?.parentElement?.querySelector('a')?.href === link) {
         btn.textContent = exists ? '⭐ Save' : '❌ Remove';
-        btn.classList.toggle('remove');
       }
     });
   }
@@ -289,24 +506,36 @@ function loadSavedNews() {
   
   if (saved.length === 0) {
     savedContainer.innerHTML = `
-      <div style="text-align: center; padding: 40px;">
-        <p>⭐ No saved news yet</p>
-        <p style="font-size: 0.9rem; margin-top: 10px;">Save interesting articles to read them later</p>
+      <div style="text-align: center; padding: 60px;">
+        <p style="font-size: 3rem;">⭐</p>
+        <p style="font-size: 1.2rem;">No saved news yet</p>
+        <p style="margin-top: 10px;">Save interesting articles to read them later</p>
       </div>
     `;
     return;
   }
   
-  savedContainer.innerHTML = saved.map(item => `
+  savedContainer.innerHTML = saved.map((item, idx) => `
     <div class="card">
-      <img src="${item.thumbnail || getFallbackImage()}" 
-           alt="${escapeHtml(item.title)}"
-           loading="lazy"
-           onerror="this.src='${getFallbackImage()}'">
+      <div class="card-img">
+        <img src="${item.thumbnail || getFallbackImage()}" 
+             alt="${escapeHtml(item.title)}"
+             loading="lazy"
+             onerror="this.src='${getFallbackImage()}'">
+        <div class="reading-time">📖 ${calculateReadingTime(item.title)} min read</div>
+      </div>
       <div class="card-content">
         <span class="source">📰 ${escapeHtml(item.source || 'News Source')}</span>
         <h3><a href="${item.link}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.title)}</a></h3>
-        <button class="save-btn" onclick="toggleSave('${escapeHtml(item.link)}', \`${escapeHtml(item.title)}\`, '${escapeHtml(item.source || '')}', '${escapeHtml(item.thumbnail || '')}')">
+        <div class="summary-section">
+          <div class="summary-header">
+            <span>🤖 AI Summary</span>
+          </div>
+          <div class="summary-text">
+            ${escapeHtml(generateSummary(item.description || item.title, item.title))}
+          </div>
+        </div>
+        <button class="action-btn save-btn" onclick="toggleSave('${escapeHtml(item.link)}', \`${escapeHtml(item.title)}\`, '${escapeHtml(item.source || '')}', '${escapeHtml(item.thumbnail || '')}', '${escapeHtml(item.description || '')}')">
           ❌ Remove
         </button>
         <div class="date">📅 Saved on ${formatDate(new Date(item.savedAt))}</div>
@@ -321,45 +550,104 @@ function isNewsSaved(link) {
 }
 
 // ============================================
+// Trending News
+// ============================================
+function loadTrendingNews() {
+  if (!trendingContainer) return;
+  
+  // Generate trending based on recency and keywords
+  const trending = [...allNewsItems]
+    .sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate))
+    .slice(0, 10);
+  
+  if (trending.length === 0) {
+    trendingContainer.innerHTML = `
+      <div style="text-align: center; padding: 60px;">
+        <p style="font-size: 3rem;">🔥</p>
+        <p style="font-size: 1.2rem;">Loading trending news...</p>
+      </div>
+    `;
+    return;
+  }
+  
+  trendingContainer.innerHTML = trending.map((item, idx) => `
+    <div class="card">
+      <div class="card-img">
+        <img src="${item.thumbnail || getFallbackImage()}" 
+             alt="${escapeHtml(item.cleanTitle)}"
+             loading="lazy"
+             onerror="this.src='${getFallbackImage()}'">
+        <div class="reading-time">📖 ${item.readingTime} min read</div>
+      </div>
+      <div class="card-content">
+        <div class="card-header">
+          <span class="source">📰 ${escapeHtml(item.source)}</span>
+          <span class="trending-indicator">🔥 #${idx + 1} Trending</span>
+        </div>
+        <h3><a href="${item.link}" target="_blank">${escapeHtml(item.cleanTitle)}</a></h3>
+        <div class="summary-section">
+          <div class="summary-header">
+            <span>🤖 AI Summary</span>
+          </div>
+          <div class="summary-text">
+            ${escapeHtml(generateSummary(item.description || item.cleanTitle, item.cleanTitle))}
+          </div>
+        </div>
+        <div class="date">📅 ${formatDate(item.pubDate)}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ============================================
 // Premium News Section
 // ============================================
 function loadPremiumNews() {
   if (!premiumContainer) return;
   
-  // Premium content - exclusive curated news
   const premiumNews = [
     {
-      title: "Exclusive: Deep Analysis of Global Economy 2024",
+      title: "Exclusive: Deep Analysis of Global Economy 2026",
       source: "Premium Insights",
       link: "#",
-      thumbnail: "https://via.placeholder.com/400x200/334155/60a5fa?text=Premium+Content",
-      description: "In-depth analysis of market trends and economic forecasts"
+      thumbnail: "https://via.placeholder.com/400x200/334155/60a5fa?text=Premium+Economic+Report",
+      description: "In-depth analysis of market trends, economic forecasts, and investment opportunities for the coming year. Expert opinions from leading economists."
     },
     {
-      title: "Inside Story: Tech Giants' Secret AI Projects",
+      title: "Inside Story: Tech Giants' Secret AI Projects Revealed",
       source: "Tech Insider Premium",
       link: "#",
-      thumbnail: "https://via.placeholder.com/400x200/334155/60a5fa?text=AI+Exclusive",
-      description: "Behind the scenes of revolutionary AI developments"
+      thumbnail: "https://via.placeholder.com/400x200/334155/8b5cf6?text=AI+Exclusive",
+      description: "Behind the scenes of revolutionary AI developments at Google, Microsoft, and OpenAI. Exclusive access to confidential documents."
     },
     {
-      title: "Premium Report: Future of Space Exploration",
+      title: "Premium Report: Future of Space Exploration 2030",
       source: "Space News Premium",
       link: "#",
-      thumbnail: "https://via.placeholder.com/400x200/334155/60a5fa?text=Space+Report",
-      description: "Exclusive coverage of upcoming space missions"
+      thumbnail: "https://via.placeholder.com/400x200/334155/ec489a?text=Space+Report",
+      description: "Exclusive coverage of upcoming NASA, SpaceX, and ISRO missions. Detailed analysis of Mars colonization plans."
+    },
+    {
+      title: "Investment Secrets: How to Build Wealth in 2026",
+      source: "Finance Premium",
+      link: "#",
+      thumbnail: "https://via.placeholder.com/400x200/334155/f59e0b?text=Wealth+Guide",
+      description: "Expert investment strategies, stock market predictions, and cryptocurrency insights for maximum returns."
     }
   ];
   
   premiumContainer.innerHTML = premiumNews.map(item => `
     <div class="card">
-      <img src="${item.thumbnail}" alt="${item.title}">
+      <div class="card-img">
+        <img src="${item.thumbnail}" alt="${item.title}">
+        <div class="reading-time">💎 Premium</div>
+      </div>
       <div class="card-content">
-        <span class="source" style="background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #000;">🔥 PREMIUM</span>
+        <span class="source" style="background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #000;">🔥 PREMIUM EXCLUSIVE</span>
         <h3><a href="${item.link}" target="_blank">${item.title}</a></h3>
         <p style="color: var(--text-secondary); margin: 10px 0;">${item.description}</p>
-        <button class="save-btn" onclick="showToast('🔒 Premium content requires subscription')">
-          🔒 Unlock Premium
+        <button class="action-btn" onclick="showToast('🔒 Premium content requires subscription. Contact support@newshub.com for access.')">
+          🔒 Unlock Premium (₹999/year)
         </button>
       </div>
     </div>
@@ -374,9 +662,54 @@ function debouncedSearch() {
   searchTimeout = setTimeout(() => {
     renderNews();
     if (searchInput.value.trim()) {
-      showToast(`🔍 Searching: "${searchInput.value}"`);
+      showToast(`🔍 Searching: "${searchInput.value}" (${document.querySelectorAll('.card').length} results)`);
     }
   }, 500);
+}
+
+// ============================================
+// Newsletter Popup
+// ============================================
+function showNewsletterPopup() {
+  // Show popup after 10 seconds or if user hasn't seen it
+  const hasSeenPopup = localStorage.getItem('newsletterSeen');
+  if (!hasSeenPopup) {
+    setTimeout(() => {
+      const popup = document.createElement('div');
+      popup.className = 'newsletter-popup';
+      popup.innerHTML = `
+        <button class="close-popup" onclick="this.parentElement.remove()">✕</button>
+        <h4>📧 Get Premium News Daily</h4>
+        <p style="font-size: 0.8rem; margin-bottom: 10px;">Subscribe for exclusive news summaries and updates!</p>
+        <input type="email" id="popupEmail" placeholder="Your email address">
+        <button onclick="subscribeNewsletter()" style="width: 100%; padding: 10px; background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple)); border: none; border-radius: 10px; color: white; cursor: pointer;">Subscribe Free</button>
+      `;
+      document.body.appendChild(popup);
+      localStorage.setItem('newsletterSeen', 'true');
+    }, 10000);
+  }
+}
+
+function subscribeNewsletter() {
+  const email = document.getElementById('popupEmail')?.value;
+  if (email && email.includes('@')) {
+    // Save to localStorage for demo
+    let subscribers = JSON.parse(localStorage.getItem('subscribers')) || [];
+    if (!subscribers.includes(email)) {
+      subscribers.push(email);
+      localStorage.setItem('subscribers', JSON.stringify(subscribers));
+      showToast('✅ Subscribed successfully! Check your inbox.');
+      document.querySelector('.newsletter-popup')?.remove();
+    } else {
+      showToast('📧 Already subscribed!');
+    }
+  } else {
+    showToast('⚠️ Please enter a valid email');
+  }
+}
+
+function showNewsletter() {
+  showNewsletterPopup();
 }
 
 // ============================================
@@ -409,20 +742,28 @@ function updateLastUpdated() {
   }
 }
 
-function showLoading(container) {
-  container.innerHTML = `
-    <div class="loading">
-      <div class="loader"></div>
-      <p style="margin-top: 20px;">Loading latest news...</p>
+function showSkeletonLoading(container) {
+  const skeletonHTML = Array(6).fill(0).map(() => `
+    <div class="skeleton-card">
+      <div class="skeleton-img skeleton"></div>
+      <div class="skeleton-content">
+        <div class="skeleton-line short skeleton"></div>
+        <div class="skeleton-line skeleton"></div>
+        <div class="skeleton-line skeleton"></div>
+        <div class="skeleton-line short skeleton"></div>
+      </div>
     </div>
-  `;
+  `).join('');
+  
+  container.innerHTML = skeletonHTML;
 }
 
 function showError(container, message) {
   container.innerHTML = `
-    <div style="text-align: center; padding: 40px;">
-      <p>⚠️ ${message}</p>
-      <button onclick="fetchNews()" style="margin-top: 20px; padding: 10px 20px; background: var(--accent-blue); border: none; border-radius: 10px; cursor: pointer;">Retry</button>
+    <div style="text-align: center; padding: 60px;">
+      <p style="font-size: 3rem;">⚠️</p>
+      <p style="font-size: 1.2rem;">${message}</p>
+      <button onclick="fetchNews()" style="margin-top: 20px; padding: 12px 24px; background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple)); border: none; border-radius: 10px; cursor: pointer; color: white;">Retry</button>
     </div>
   `;
 }
@@ -440,14 +781,14 @@ function showToast(message) {
   
   // Auto remove after 3 seconds
   setTimeout(() => {
-    toast.style.animation = 'slideIn 0.3s ease reverse';
+    toast.style.animation = 'slideUp 0.3s ease reverse';
     setTimeout(() => toast.remove(), 300);
   }, 3000);
 }
 
 function escapeHtml(str) {
   if (!str) return '';
-  return str
+  return String(str)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
@@ -477,3 +818,7 @@ window.toggleSave = toggleSave;
 window.toggleTheme = toggleTheme;
 window.debouncedSearch = debouncedSearch;
 window.showToast = showToast;
+window.shareArticle = shareArticle;
+window.regenerateSummary = regenerateSummary;
+window.subscribeNewsletter = subscribeNewsletter;
+window.showNewsletter = showNewsletter;
