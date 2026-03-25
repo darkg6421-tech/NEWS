@@ -25,6 +25,11 @@
   <meta property="og:locale" content="en_IN">
   
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
     :root {
       --bg-primary: #0f172a;
@@ -46,7 +51,7 @@
       --bg-tertiary: #e2e8f0;
       --text-primary: #0f172a;
       --text-secondary: #334155;
-      --shadow: 0 8px 16px rgba(0,0,0,0.1);
+      --shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 
     body {
@@ -57,7 +62,6 @@
       overflow-x: hidden;
     }
 
-    /* Modern Scrollbar */
     ::-webkit-scrollbar {
       width: 10px;
     }
@@ -71,11 +75,6 @@
       border-radius: 10px;
     }
 
-    ::-webkit-scrollbar-thumb:hover {
-      background: #3b82f6;
-    }
-
-    /* Top Bar */
     .topbar {
       position: sticky;
       top: 0;
@@ -122,7 +121,6 @@
       margin: 0;
     }
 
-    /* Side Menu */
     #menu {
       position: fixed;
       top: 0;
@@ -176,7 +174,6 @@
       transform: translateX(5px);
     }
 
-    /* Search Bar */
     .search-container {
       max-width: 600px;
       margin: 0 auto 20px;
@@ -200,7 +197,6 @@
       box-shadow: 0 0 0 3px var(--accent-blue);
     }
 
-    /* Category Buttons */
     .categories {
       display: flex;
       gap: 12px;
@@ -233,7 +229,6 @@
       color: white;
     }
 
-    /* Refresh Button */
     .refresh-btn {
       display: block;
       margin: 20px auto;
@@ -252,7 +247,6 @@
       box-shadow: var(--shadow);
     }
 
-    /* News Cards */
     .news-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -339,7 +333,6 @@
       margin-top: 10px;
     }
 
-    /* Loading Animation */
     .loading {
       text-align: center;
       padding: 40px;
@@ -370,7 +363,6 @@
       }
     }
 
-    /* Toast Notification */
     .toast {
       position: fixed;
       bottom: 20px;
@@ -395,7 +387,6 @@
       }
     }
 
-    /* Footer */
     footer {
       margin-top: 50px;
       padding: 30px 20px;
@@ -416,7 +407,6 @@
       text-decoration: underline;
     }
 
-    /* Responsive */
     @media (max-width: 768px) {
       .news-grid {
         grid-template-columns: 1fr;
@@ -433,7 +423,6 @@
       }
     }
 
-    /* Premium Section */
     .premium-badge {
       background: linear-gradient(135deg, #fbbf24, #f59e0b);
       color: #000;
@@ -485,7 +474,7 @@
     </div>
 
     <button class="refresh-btn" onclick="fetchNews()">🔄 Refresh News</button>
-    <p id="last" style="text-align: center; font-size: 0.8rem;"></p>
+    <p id="last" style="text-align: center; font-size: 0.8rem; margin-top: 10px;"></p>
 
     <div id="news" class="news-grid">Loading...</div>
   </div>
