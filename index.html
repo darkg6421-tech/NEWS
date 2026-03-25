@@ -4,17 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#0f172a">
-  <meta name="description" content="Stay updated with latest news from India and around the world">
-  <meta name="keywords" content="news, latest news, india news, world news">
-  <meta name="author" content="News App">
+  <meta name="description" content="Premium NewsHub - Latest news with AI summaries, trending stories, and real-time updates">
+  <meta name="keywords" content="news, premium news, AI news summary, trending news, india news, world news">
+  <meta name="author" content="NewsHub Premium">
   
-  <title>NewsHub - Latest News</title>
+  <title>NewsHub Premium - Smart News with AI Summary</title>
   
   <!-- PWA Support -->
   <link rel="manifest" href="manifest.json">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="NewsHub">
+  <meta name="apple-mobile-web-app-title" content="NewsHub Premium">
   
   <style>
     * {
@@ -29,11 +29,16 @@
       --bg-tertiary: #334155;
       --text-primary: #f1f5f9;
       --text-secondary: #cbd5e1;
-      --accent-blue: #60a5fa;
-      --accent-green: #22c55e;
+      --accent-blue: #3b82f6;
+      --accent-purple: #8b5cf6;
+      --accent-green: #10b981;
       --accent-red: #ef4444;
-      --accent-yellow: #fbbf24;
-      --shadow: 0 8px 16px rgba(0,0,0,0.3);
+      --accent-yellow: #f59e0b;
+      --accent-pink: #ec489a;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+      --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
       --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
@@ -42,8 +47,10 @@
       --bg-secondary: #ffffff;
       --bg-tertiary: #e2e8f0;
       --text-primary: #0f172a;
-      --text-secondary: #334155;
-      --shadow: 0 8px 16px rgba(0,0,0,0.1);
+      --text-secondary: #475569;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
     }
 
     body {
@@ -56,7 +63,8 @@
 
     /* Modern Scrollbar */
     ::-webkit-scrollbar {
-      width: 10px;
+      width: 8px;
+      height: 8px;
     }
 
     ::-webkit-scrollbar-track {
@@ -64,12 +72,44 @@
     }
 
     ::-webkit-scrollbar-thumb {
-      background: var(--accent-blue);
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
       border-radius: 10px;
     }
 
-    ::-webkit-scrollbar-thumb:hover {
-      background: #3b82f6;
+    /* Breaking News Ticker */
+    .breaking-ticker {
+      background: linear-gradient(90deg, var(--accent-red), var(--accent-pink));
+      color: white;
+      padding: 10px 0;
+      overflow: hidden;
+      white-space: nowrap;
+      position: relative;
+      z-index: 99;
+    }
+
+    .ticker-content {
+      display: inline-block;
+      animation: ticker 30s linear infinite;
+      padding-left: 100%;
+    }
+
+    .ticker-item {
+      display: inline-block;
+      margin-right: 40px;
+      font-weight: 500;
+    }
+
+    .ticker-badge {
+      background: rgba(255,255,255,0.3);
+      padding: 2px 8px;
+      border-radius: 20px;
+      margin-right: 10px;
+      font-size: 0.8rem;
+    }
+
+    @keyframes ticker {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
     }
 
     /* Top Bar */
@@ -77,20 +117,24 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      background: var(--bg-secondary);
+      background: rgba(15, 23, 42, 0.95);
       backdrop-filter: blur(10px);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 12px 20px;
-      box-shadow: var(--shadow);
-      margin-bottom: 20px;
+      padding: 12px 24px;
+      box-shadow: var(--shadow-lg);
+      border-bottom: 1px solid rgba(59,130,246,0.2);
+    }
+
+    [data-theme="light"] .topbar {
+      background: rgba(255, 255, 255, 0.95);
     }
 
     .topbar-left {
       display: flex;
       align-items: center;
-      gap: 15px;
+      gap: 20px;
     }
 
     .menu-btn, .theme-toggle {
@@ -106,33 +150,48 @@
 
     .menu-btn:hover, .theme-toggle:hover {
       transform: scale(1.05);
-      background: var(--accent-blue);
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
       color: white;
     }
 
-    h1, h2 {
-      font-size: 1.5rem;
-      background: linear-gradient(135deg, var(--accent-blue), #8b5cf6);
+    .logo {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .logo h1 {
+      font-size: 1.8rem;
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple), var(--accent-pink));
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
-      margin: 0;
+    }
+
+    .premium-badge {
+      background: linear-gradient(135deg, var(--accent-yellow), #f97316);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: bold;
+      color: #000;
     }
 
     /* Side Menu */
     #menu {
       position: fixed;
       top: 0;
-      left: -300px;
-      width: 280px;
+      left: -320px;
+      width: 320px;
       height: 100%;
       background: var(--bg-secondary);
       backdrop-filter: blur(20px);
-      padding: 20px;
+      padding: 24px;
       transition: var(--transition);
       z-index: 1000;
-      box-shadow: 2px 0 20px rgba(0,0,0,0.3);
+      box-shadow: var(--shadow-xl);
       overflow-y: auto;
+      border-right: 1px solid var(--accent-blue);
     }
 
     #menu.open {
@@ -154,10 +213,16 @@
       font-size: 28px;
       cursor: pointer;
       color: var(--text-secondary);
+      transition: var(--transition);
+    }
+
+    .close-menu:hover {
+      color: var(--accent-red);
+      transform: rotate(90deg);
     }
 
     .menu-item {
-      padding: 12px 15px;
+      padding: 14px 18px;
       margin: 8px 0;
       border-radius: 12px;
       cursor: pointer;
@@ -166,10 +231,11 @@
       display: flex;
       align-items: center;
       gap: 12px;
+      font-weight: 500;
     }
 
     .menu-item:hover {
-      background: var(--bg-tertiary);
+      background: linear-gradient(90deg, var(--accent-blue), transparent);
       transform: translateX(5px);
     }
 
@@ -177,24 +243,38 @@
     .search-container {
       max-width: 600px;
       margin: 0 auto 20px;
-      padding: 0 15px;
+      padding: 0 20px;
+      position: relative;
     }
 
     #search {
       width: 100%;
       padding: 14px 20px;
       border-radius: 50px;
-      border: none;
+      border: 2px solid transparent;
       background: var(--bg-secondary);
       color: var(--text-primary);
       font-size: 1rem;
       transition: var(--transition);
-      box-shadow: var(--shadow);
+      box-shadow: var(--shadow-md);
     }
 
     #search:focus {
       outline: none;
-      box-shadow: 0 0 0 3px var(--accent-blue);
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.3);
+    }
+
+    .search-shortcut {
+      position: absolute;
+      right: 35px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--bg-tertiary);
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 0.7rem;
+      color: var(--text-secondary);
     }
 
     /* Category Buttons */
@@ -204,29 +284,31 @@
       flex-wrap: wrap;
       justify-content: center;
       margin: 20px 0;
-      padding: 0 15px;
+      padding: 0 20px;
     }
 
     .category-btn {
-      padding: 10px 20px;
+      padding: 10px 24px;
       border-radius: 50px;
       border: none;
       background: var(--bg-secondary);
       color: var(--text-primary);
       cursor: pointer;
       transition: var(--transition);
-      font-weight: 500;
+      font-weight: 600;
+      font-size: 0.9rem;
     }
 
     .category-btn.active {
-      background: var(--accent-blue);
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
       color: white;
       transform: scale(1.05);
+      box-shadow: var(--shadow-md);
     }
 
     .category-btn:hover {
       transform: translateY(-2px);
-      background: var(--accent-blue);
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
       color: white;
     }
 
@@ -234,154 +316,261 @@
     .refresh-btn {
       display: block;
       margin: 20px auto;
-      padding: 12px 30px;
-      background: linear-gradient(135deg, var(--accent-blue), #8b5cf6);
+      padding: 12px 32px;
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
       border: none;
       border-radius: 50px;
       color: white;
       cursor: pointer;
       font-weight: bold;
       transition: var(--transition);
+      font-size: 1rem;
     }
 
     .refresh-btn:hover {
       transform: translateY(-2px);
-      box-shadow: var(--shadow);
+      box-shadow: var(--shadow-lg);
     }
 
-    /* News Cards */
+    /* News Grid */
     .news-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 20px;
-      padding: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 24px;
+      padding: 20px 24px;
     }
 
+    /* Card Styles */
     .card {
       background: var(--bg-secondary);
-      border-radius: 16px;
+      border-radius: 20px;
       overflow: hidden;
       transition: var(--transition);
       animation: fadeInUp 0.5s ease;
-      box-shadow: var(--shadow);
+      box-shadow: var(--shadow-md);
+      position: relative;
     }
 
     .card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 12px 24px rgba(0,0,0,0.4);
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-xl);
     }
 
-    .card img {
+    .card-img {
+      position: relative;
+      overflow: hidden;
+      height: 220px;
+    }
+
+    .card-img img {
       width: 100%;
-      height: 200px;
+      height: 100%;
       object-fit: cover;
-      transition: var(--transition);
+      transition: transform 0.5s ease;
     }
 
-    .card:hover img {
-      transform: scale(1.05);
+    .card:hover .card-img img {
+      transform: scale(1.1);
+    }
+
+    .reading-time {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(5px);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      color: white;
     }
 
     .card-content {
       padding: 20px;
     }
 
-    .card h3 {
-      margin: 10px 0;
-      font-size: 1.2rem;
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
     }
 
-    .card a {
-      color: var(--accent-blue);
+    .source {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 12px;
+      background: var(--bg-tertiary);
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    .trending-indicator {
+      color: var(--accent-red);
+      font-size: 0.8rem;
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .card h3 {
+      font-size: 1.2rem;
+      margin: 12px 0;
+      line-height: 1.4;
+    }
+
+    .card h3 a {
+      color: var(--text-primary);
       text-decoration: none;
       transition: var(--transition);
     }
 
-    .card a:hover {
-      color: #3b82f6;
-      text-decoration: underline;
+    .card h3 a:hover {
+      color: var(--accent-blue);
     }
 
-    .source {
-      display: inline-block;
-      padding: 4px 12px;
-      background: var(--bg-tertiary);
-      border-radius: 20px;
+    /* Summary Section */
+    .summary-section {
+      margin: 15px 0;
+      padding: 12px;
+      background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(139,92,246,0.1));
+      border-radius: 12px;
+      border-left: 3px solid var(--accent-blue);
+    }
+
+    .summary-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--accent-blue);
+    }
+
+    .summary-text {
+      font-size: 0.85rem;
+      line-height: 1.5;
+      color: var(--text-secondary);
+    }
+
+    .generate-summary-btn {
+      background: none;
+      border: none;
+      color: var(--accent-blue);
+      cursor: pointer;
       font-size: 0.75rem;
-      color: var(--accent-green);
-      margin: 10px 0;
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: var(--transition);
     }
 
-    .save-btn {
-      width: 100%;
-      padding: 10px;
-      margin: 10px 0;
+    .generate-summary-btn:hover {
+      background: var(--bg-tertiary);
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      margin: 15px 0 10px;
+    }
+
+    .action-btn {
+      flex: 1;
+      padding: 8px;
       border: none;
       border-radius: 10px;
       background: var(--bg-tertiary);
       color: var(--text-primary);
       cursor: pointer;
       transition: var(--transition);
-      font-weight: 500;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+
+    .action-btn:hover {
+      background: var(--accent-blue);
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    .save-btn {
+      background: linear-gradient(135deg, var(--accent-green), #059669);
     }
 
     .save-btn:hover {
-      background: var(--accent-blue);
-      color: white;
+      background: linear-gradient(135deg, #059669, var(--accent-green));
     }
 
     .date {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       color: var(--text-secondary);
-      margin-top: 10px;
+      margin-top: 12px;
     }
 
-    /* Loading Animation */
-    .loading {
-      text-align: center;
-      padding: 40px;
+    /* Skeleton Loading */
+    .skeleton {
+      background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-secondary) 50%, var(--bg-tertiary) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
     }
 
-    .loader {
-      width: 50px;
-      height: 50px;
-      border: 3px solid var(--bg-tertiary);
-      border-top-color: var(--accent-blue);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin: 0 auto;
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
     }
 
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    .skeleton-card {
+      background: var(--bg-secondary);
+      border-radius: 20px;
+      overflow: hidden;
     }
 
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    .skeleton-img {
+      height: 220px;
+      background: var(--bg-tertiary);
     }
 
-    /* Toast Notification */
-    .toast {
+    .skeleton-content {
+      padding: 20px;
+    }
+
+    .skeleton-line {
+      height: 20px;
+      background: var(--bg-tertiary);
+      margin: 10px 0;
+      border-radius: 10px;
+    }
+
+    .skeleton-line.short {
+      width: 60%;
+    }
+
+    /* Newsletter Popup */
+    .newsletter-popup {
       position: fixed;
       bottom: 20px;
       right: 20px;
-      background: var(--accent-green);
-      color: white;
-      padding: 12px 24px;
-      border-radius: 50px;
-      z-index: 2000;
-      animation: slideIn 0.3s ease;
-      box-shadow: var(--shadow);
+      background: var(--bg-secondary);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: var(--shadow-xl);
+      z-index: 1000;
+      max-width: 320px;
+      animation: slideInRight 0.5s ease;
+      border: 1px solid var(--accent-blue);
     }
 
-    @keyframes slideIn {
+    @keyframes slideInRight {
       from {
         transform: translateX(100%);
         opacity: 0;
@@ -392,10 +581,63 @@
       }
     }
 
+    .newsletter-popup h4 {
+      margin-bottom: 10px;
+      color: var(--accent-blue);
+    }
+
+    .newsletter-popup input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 10px;
+      border: 1px solid var(--bg-tertiary);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+    }
+
+    .close-popup {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: var(--text-secondary);
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+      color: white;
+      padding: 12px 24px;
+      border-radius: 50px;
+      z-index: 2000;
+      animation: slideUp 0.3s ease;
+      box-shadow: var(--shadow-lg);
+      font-weight: 500;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateX(-50%) translateY(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+      }
+    }
+
     /* Footer */
     footer {
       margin-top: 50px;
-      padding: 30px 20px;
+      padding: 40px 20px;
       text-align: center;
       background: var(--bg-secondary);
       border-top: 1px solid var(--bg-tertiary);
@@ -409,8 +651,7 @@
     }
 
     footer a:hover {
-      color: #3b82f6;
-      text-decoration: underline;
+      color: var(--accent-purple);
     }
 
     /* Responsive */
@@ -418,42 +659,66 @@
       .news-grid {
         grid-template-columns: 1fr;
         padding: 15px;
+        gap: 20px;
       }
       
       .topbar {
         padding: 10px 15px;
       }
       
+      .logo h1 {
+        font-size: 1.2rem;
+      }
+      
       .category-btn {
-        padding: 8px 16px;
-        font-size: 0.9rem;
+        padding: 6px 14px;
+        font-size: 0.8rem;
+      }
+
+      .search-shortcut {
+        display: none;
       }
     }
 
-    /* Premium Section */
-    .premium-badge {
-      background: linear-gradient(135deg, #fbbf24, #f59e0b);
-      color: #000;
-      padding: 4px 12px;
+    /* Keyboard Shortcut Hint */
+    .keyboard-hint {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background: var(--bg-secondary);
+      padding: 8px 12px;
       border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: bold;
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+      z-index: 99;
+      opacity: 0.7;
     }
   </style>
 </head>
 
 <body>
+  <!-- Breaking News Ticker -->
+  <div class="breaking-ticker" id="breakingTicker">
+    <div class="ticker-content" id="tickerContent">
+      <span class="ticker-item"><span class="ticker-badge">🔴 LIVE</span> Breaking: Major updates coming...</span>
+      <span class="ticker-item"><span class="ticker-badge">🔥 TRENDING</span> Stay tuned for latest news...</span>
+    </div>
+  </div>
+
   <div class="topbar">
     <div class="topbar-left">
       <button class="menu-btn" onclick="toggleMenu()">☰</button>
-      <h1>NewsHub</h1>
+      <div class="logo">
+        <h1>NewsHub</h1>
+        <span class="premium-badge">PREMIUM</span>
+      </div>
     </div>
     <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
   </div>
 
   <div id="menu">
     <div class="menu-header">
-      <h2>Menu</h2>
+      <h2>📋 Menu</h2>
       <button class="close-menu" onclick="toggleMenu()">✕</button>
     </div>
     <div class="menu-item" onclick="showSection('home')">
@@ -462,14 +727,21 @@
     <div class="menu-item" onclick="showSection('saved')">
       <span>⭐</span> Saved News
     </div>
+    <div class="menu-item" onclick="showSection('trending')">
+      <span>🔥</span> Trending Now
+    </div>
     <div class="menu-item" onclick="showSection('premium')">
-      <span>🔥</span> Premium News
+      <span>💎</span> Premium Exclusive
+    </div>
+    <div class="menu-item" onclick="showToast('⚡ Keyboard Shortcuts: S=Search, D=Dark Mode, ?=Help')">
+      <span>⌨️</span> Keyboard Shortcuts
     </div>
   </div>
 
   <div id="homeSection">
     <div class="search-container">
-      <input type="text" id="search" placeholder="🔍 Search news articles..." oninput="debouncedSearch()">
+      <input type="text" id="search" placeholder="🔍 Search news articles... (Press S to focus)">
+      <span class="search-shortcut">⌘S</span>
     </div>
 
     <div class="categories">
@@ -479,12 +751,13 @@
       <button class="category-btn" onclick="setCategory('world')">🌍 World</button>
       <button class="category-btn" onclick="setCategory('technology')">💻 Tech</button>
       <button class="category-btn" onclick="setCategory('sports')">⚽ Sports</button>
+      <button class="category-btn" onclick="setCategory('business')">📈 Business</button>
     </div>
 
     <button class="refresh-btn" onclick="fetchNews()">🔄 Refresh News</button>
-    <p id="last" style="text-align: center; font-size: 0.8rem;"></p>
+    <p id="last" style="text-align: center; font-size: 0.8rem; opacity: 0.7;"></p>
 
-    <div id="news" class="news-grid">Loading...</div>
+    <div id="news" class="news-grid"></div>
   </div>
 
   <div id="savedSection" style="display:none;">
@@ -492,8 +765,13 @@
     <div id="saved" class="news-grid"></div>
   </div>
 
+  <div id="trendingSection" style="display:none;">
+    <h2 style="text-align: center; margin: 30px 0;">🔥 Trending Now</h2>
+    <div id="trending" class="news-grid"></div>
+  </div>
+
   <div id="premiumSection" style="display:none;">
-    <h2 style="text-align: center; margin: 30px 0;">🔥 Premium News</h2>
+    <h2 style="text-align: center; margin: 30px 0;">💎 Premium Exclusive Content</h2>
     <div id="premium" class="news-grid"></div>
   </div>
 
@@ -502,11 +780,16 @@
     <p>
       <a href="privacy.html">Privacy Policy</a> |
       <a href="about.html">About Us</a> |
-      <a href="contact.html">Contact</a>
+      <a href="contact.html">Contact</a> |
+      <a href="#" onclick="showNewsletter()">📧 Newsletter</a>
     </p>
-    <p style="margin-top: 15px;">© 2024 NewsHub - Stay Informed</p>
+    <p style="margin-top: 15px;">© 2024 NewsHub Premium - Smart News with AI Summary</p>
   </footer>
 
-  <script src="script.js?v=2"></script>
+  <div class="keyboard-hint">
+    ⌨️ S: Search | D: Dark Mode
+  </div>
+
+  <script src="script.js?v=3"></script>
 </body>
 </html>
