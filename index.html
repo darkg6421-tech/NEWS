@@ -4,25 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#0f172a">
-  <meta name="description" content="Stay updated with latest news from India and around the world - NewsHub provides real-time news coverage">
-  <meta name="keywords" content="news, latest news, india news, world news, breaking news, current affairs, news app">
-  <meta name="author" content="NewsHub">
-  <meta name="robots" content="index, follow">
-  <meta name="googlebot" content="index, follow">
+  <meta name="description" content="Stay updated with latest news from India and around the world">
+  <meta name="keywords" content="news, latest news, india news, world news">
+  <meta name="author" content="News App">
   
-  <title>NewsHub - Latest News | India & World News</title>
+  <title>NewsHub - Latest News</title>
   
   <!-- PWA Support -->
   <link rel="manifest" href="manifest.json">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="NewsHub">
-  
-  <!-- Open Graph / Social Media -->
-  <meta property="og:title" content="NewsHub - Latest News">
-  <meta property="og:description" content="Stay updated with latest news from India and around the world">
-  <meta property="og:type" content="website">
-  <meta property="og:locale" content="en_IN">
   
   <style>
     * {
@@ -51,7 +43,7 @@
       --bg-tertiary: #e2e8f0;
       --text-primary: #0f172a;
       --text-secondary: #334155;
-      --shadow: 0 4px 12px rgba(0,0,0,0.1);
+      --shadow: 0 8px 16px rgba(0,0,0,0.1);
     }
 
     body {
@@ -62,6 +54,7 @@
       overflow-x: hidden;
     }
 
+    /* Modern Scrollbar */
     ::-webkit-scrollbar {
       width: 10px;
     }
@@ -75,6 +68,11 @@
       border-radius: 10px;
     }
 
+    ::-webkit-scrollbar-thumb:hover {
+      background: #3b82f6;
+    }
+
+    /* Top Bar */
     .topbar {
       position: sticky;
       top: 0;
@@ -121,6 +119,7 @@
       margin: 0;
     }
 
+    /* Side Menu */
     #menu {
       position: fixed;
       top: 0;
@@ -174,6 +173,7 @@
       transform: translateX(5px);
     }
 
+    /* Search Bar */
     .search-container {
       max-width: 600px;
       margin: 0 auto 20px;
@@ -197,6 +197,7 @@
       box-shadow: 0 0 0 3px var(--accent-blue);
     }
 
+    /* Category Buttons */
     .categories {
       display: flex;
       gap: 12px;
@@ -229,6 +230,7 @@
       color: white;
     }
 
+    /* Refresh Button */
     .refresh-btn {
       display: block;
       margin: 20px auto;
@@ -247,22 +249,21 @@
       box-shadow: var(--shadow);
     }
 
+    /* News Cards */
     .news-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-      gap: 25px;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
       padding: 20px;
     }
 
     .card {
       background: var(--bg-secondary);
-      border-radius: 20px;
+      border-radius: 16px;
       overflow: hidden;
       transition: var(--transition);
       animation: fadeInUp 0.5s ease;
       box-shadow: var(--shadow);
-      display: flex;
-      flex-direction: column;
     }
 
     .card:hover {
@@ -283,15 +284,11 @@
 
     .card-content {
       padding: 20px;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
     }
 
     .card h3 {
       margin: 10px 0;
       font-size: 1.2rem;
-      line-height: 1.4;
     }
 
     .card a {
@@ -303,27 +300,6 @@
     .card a:hover {
       color: #3b82f6;
       text-decoration: underline;
-    }
-
-    /* Summary Styles */
-    .news-summary {
-      margin: 12px 0;
-      padding: 12px;
-      background: var(--bg-tertiary);
-      border-radius: 12px;
-      font-size: 0.9rem;
-      line-height: 1.5;
-      color: var(--text-secondary);
-    }
-
-    .read-time {
-      display: inline-block;
-      padding: 4px 10px;
-      background: var(--accent-blue);
-      border-radius: 20px;
-      font-size: 0.7rem;
-      color: white;
-      margin-right: 8px;
     }
 
     .source {
@@ -360,14 +336,7 @@
       margin-top: 10px;
     }
 
-    .meta-info {
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin: 10px 0;
-    }
-
+    /* Loading Animation */
     .loading {
       text-align: center;
       padding: 40px;
@@ -398,6 +367,7 @@
       }
     }
 
+    /* Toast Notification */
     .toast {
       position: fixed;
       bottom: 20px;
@@ -422,6 +392,7 @@
       }
     }
 
+    /* Footer */
     footer {
       margin-top: 50px;
       padding: 30px 20px;
@@ -442,6 +413,7 @@
       text-decoration: underline;
     }
 
+    /* Responsive */
     @media (max-width: 768px) {
       .news-grid {
         grid-template-columns: 1fr;
@@ -456,6 +428,16 @@
         padding: 8px 16px;
         font-size: 0.9rem;
       }
+    }
+
+    /* Premium Section */
+    .premium-badge {
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      color: #000;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -500,7 +482,7 @@
     </div>
 
     <button class="refresh-btn" onclick="fetchNews()">🔄 Refresh News</button>
-    <p id="last" style="text-align: center; font-size: 0.8rem; margin-top: 10px;"></p>
+    <p id="last" style="text-align: center; font-size: 0.8rem;"></p>
 
     <div id="news" class="news-grid">Loading...</div>
   </div>
@@ -526,232 +508,5 @@
   </footer>
 
   <script src="script.js?v=2"></script>
-  <script>
-    // ============================================
-    // SUMMARY GENERATOR FUNCTION
-    // ============================================
-    function generateSummary(title, content) {
-      // Create a meaningful summary based on title and available content
-      const summaries = [
-        `This article discusses ${title.toLowerCase()}. It covers the latest developments and key insights on this important topic. According to sources, this news highlights significant events that impact our daily lives. Stay informed with the complete details in the full article.`,
-        
-        `In this breaking news update, ${title.toLowerCase()} takes center stage. The report provides comprehensive coverage of the situation, including expert opinions and official statements. Readers can get the full story by clicking the link above.`,
-        
-        `Here's what you need to know about ${title.toLowerCase()}. This summary covers the main points and crucial details that matter most. For complete coverage and in-depth analysis, check out the original source.`,
-        
-        `Latest updates on ${title.toLowerCase()} reveal important developments. This news story brings you the key facts and essential information you need to stay informed about this ongoing situation.`,
-        
-        `A detailed look at ${title.toLowerCase()} shows significant implications. Our coverage includes the most relevant aspects of this story, helping you understand what's happening and why it matters.`
-      ];
-      
-      // Select a random summary
-      let summary = summaries[Math.floor(Math.random() * summaries.length)];
-      
-      // Ensure summary is between 100-150 words
-      const wordCount = summary.split(' ').length;
-      if (wordCount < 100) {
-        summary += " This news is important because it affects our community and has broader implications. Experts suggest staying updated as more information becomes available. We'll continue to monitor this story and provide updates as they happen.";
-      }
-      
-      return summary;
-    }
-    
-    function calculateReadTime(title) {
-      const wordsPerMinute = 200;
-      const titleWords = title.split(' ').length;
-      const estimatedWords = titleWords + 120; // title + summary words
-      const minutes = Math.max(1, Math.ceil(estimatedWords / wordsPerMinute));
-      return minutes;
-    }
-    
-    // Override the createNewsCard function
-    const originalRenderNews = renderNews;
-    
-    // Enhanced news rendering with summary
-    window.renderNews = function() {
-      if (!newsContainer) return;
-      
-      const searchText = searchInput ? searchInput.value.toLowerCase().trim() : '';
-      
-      let filteredNews = allNewsItems.filter(item => {
-        if (currentCategory !== 'all') {
-          const title = item.cleanTitle.toLowerCase();
-          if (currentCategory === 'india' && !title.includes('india')) return false;
-          if (currentCategory === 'defence' && !(title.includes('army') || title.includes('defence') || title.includes('war') || title.includes('military'))) return false;
-          if (currentCategory === 'world' && !(title.includes('world') || title.includes('international') || title.includes('us') || title.includes('china') || title.includes('russia'))) return false;
-          if (currentCategory === 'technology' && !(title.includes('tech') || title.includes('ai') || title.includes('digital') || title.includes('software'))) return false;
-          if (currentCategory === 'sports' && !(title.includes('sport') || title.includes('cricket') || title.includes('football') || title.includes('match'))) return false;
-        }
-        
-        if (searchText && !item.cleanTitle.toLowerCase().includes(searchText)) return false;
-        
-        return true;
-      });
-      
-      if (filteredNews.length === 0) {
-        newsContainer.innerHTML = `
-          <div style="text-align: center; padding: 40px;">
-            <p>😕 No news found matching your criteria</p>
-            <button onclick="fetchNews()" style="margin-top: 20px; padding: 10px 20px; background: var(--accent-blue); border: none; border-radius: 10px; cursor: pointer;">Refresh</button>
-          </div>
-        `;
-        return;
-      }
-      
-      localStorage.setItem('cachedNews', JSON.stringify(filteredNews.slice(0, 50)));
-      
-      newsContainer.innerHTML = filteredNews.map(item => {
-        const summary = generateSummary(item.cleanTitle, item.description || '');
-        const readTime = calculateReadTime(item.cleanTitle);
-        const isSaved = isNewsSaved(item.link);
-        const saveButtonText = isSaved ? '❌ Remove' : '⭐ Save';
-        
-        return `
-          <div class="card">
-            <img src="${item.thumbnail || getFallbackImage()}" 
-                 alt="${escapeHtml(item.cleanTitle)}"
-                 loading="lazy"
-                 onerror="this.src='${getFallbackImage()}'">
-            <div class="card-content">
-              <div class="meta-info">
-                <span class="read-time">⏱️ ${readTime} min read</span>
-                <span class="source">📰 ${escapeHtml(item.source)}</span>
-              </div>
-              <h3><a href="${item.link}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.cleanTitle)}</a></h3>
-              <div class="news-summary">
-                📖 ${escapeHtml(summary)}
-              </div>
-              <button class="save-btn" onclick="toggleSave('${escapeHtml(item.link)}', \`${escapeHtml(item.cleanTitle)}\`, '${escapeHtml(item.source)}', '${escapeHtml(item.thumbnail || '')}', \`${escapeHtml(summary)}\`, ${readTime})">
-                ${saveButtonText}
-              </button>
-              <div class="date">📅 ${formatDate(item.pubDate)}</div>
-            </div>
-          </div>
-        `;
-      }).join('');
-    };
-    
-    // Update save function to include summary and read time
-    const originalToggleSave = window.toggleSave;
-    window.toggleSave = function(link, title, source, thumbnail, summary, readTime) {
-      let saved = JSON.parse(localStorage.getItem('savedNews')) || [];
-      const exists = saved.find(item => item.link === link);
-      
-      if (exists) {
-        saved = saved.filter(item => item.link !== link);
-        showToast(`❌ Removed from saved`);
-      } else {
-        saved.push({ 
-          link, 
-          title, 
-          source, 
-          thumbnail, 
-          summary: summary || generateSummary(title, ''),
-          readTime: readTime || calculateReadTime(title),
-          savedAt: new Date().toISOString() 
-        });
-        showToast(`⭐ Saved to bookmarks`);
-      }
-      
-      localStorage.setItem('savedNews', JSON.stringify(saved));
-      
-      if (currentSection === 'saved') {
-        loadSavedNews();
-      }
-    };
-    
-    // Update loadSavedNews to show summary and read time
-    const originalLoadSavedNews = window.loadSavedNews;
-    window.loadSavedNews = function() {
-      if (!savedContainer) return;
-      
-      const saved = JSON.parse(localStorage.getItem('savedNews')) || [];
-      
-      if (saved.length === 0) {
-        savedContainer.innerHTML = `
-          <div style="text-align: center; padding: 40px;">
-            <p>⭐ No saved news yet</p>
-            <p style="font-size: 0.9rem; margin-top: 10px;">Save interesting articles to read them later</p>
-          </div>
-        `;
-        return;
-      }
-      
-      savedContainer.innerHTML = saved.map(item => `
-        <div class="card">
-          <img src="${item.thumbnail || getFallbackImage()}" 
-               alt="${escapeHtml(item.title)}"
-               loading="lazy"
-               onerror="this.src='${getFallbackImage()}'">
-          <div class="card-content">
-            <div class="meta-info">
-              <span class="read-time">⏱️ ${item.readTime || 2} min read</span>
-              <span class="source">📰 ${escapeHtml(item.source || 'News Source')}</span>
-            </div>
-            <h3><a href="${item.link}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.title)}</a></h3>
-            <div class="news-summary">
-              📖 ${escapeHtml(item.summary || generateSummary(item.title, ''))}
-            </div>
-            <button class="save-btn" onclick="toggleSave('${escapeHtml(item.link)}', \`${escapeHtml(item.title)}\`, '${escapeHtml(item.source || '')}', '${escapeHtml(item.thumbnail || '')}', \`${escapeHtml(item.summary || '')}\`, ${item.readTime || 2})">
-              ❌ Remove
-            </button>
-            <div class="date">📅 Saved on ${formatDate(new Date(item.savedAt))}</div>
-          </div>
-        </div>
-      `).join('');
-    };
-    
-    function getFallbackImage() {
-      return 'https://via.placeholder.com/400x200/1e293b/60a5fa?text=NewsHub';
-    }
-    
-    function escapeHtml(str) {
-      if (!str) return '';
-      return str
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-    }
-    
-    function formatDate(date) {
-      if (!date) return 'Recently';
-      
-      const now = new Date();
-      const diff = now - new Date(date);
-      const minutes = Math.floor(diff / 60000);
-      const hours = Math.floor(minutes / 60);
-      const days = Math.floor(hours / 24);
-      
-      if (minutes < 1) return 'Just now';
-      if (minutes < 60) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
-      if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
-      if (days < 7) return `${days} day${days > 1 ? 's' : ''} ago`;
-      
-      return new Date(date).toLocaleDateString('en-IN', { 
-        day: 'numeric', 
-        month: 'short', 
-        year: 'numeric' 
-      });
-    }
-    
-    function showToast(message) {
-      const existingToast = document.querySelector('.toast');
-      if (existingToast) existingToast.remove();
-      
-      const toast = document.createElement('div');
-      toast.className = 'toast';
-      toast.textContent = message;
-      document.body.appendChild(toast);
-      
-      setTimeout(() => {
-        toast.style.animation = 'slideIn 0.3s ease reverse';
-        setTimeout(() => toast.remove(), 300);
-      }, 3000);
-    }
-    
-    console.log('✅ NewsHub with Summary & Read Time - Ready!');
-  </script>
 </body>
 </html>
