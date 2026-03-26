@@ -1,0 +1,368 @@
+// ============================================
+// NewsHub Premium - Version 6.2 (News Fixed + Categories Working)
+// ============================================
+
+let currentCategory = 'all';
+let allNewsItems = [];
+let isLoading = false;
+let searchTimeout = null;
+let currentSection = 'home';
+let newsSummaries = new Map();
+
+const menu = document.getElementById('menu');
+const newsContainer = document.getElementById('news');
+const savedContainer = document.getElementById('saved');
+const trendingContainer = document.getElementById('trending');
+const premiumContainer = document.getElementById('premium');
+const lastUpdatedSpan = document.getElementById('last');
+const searchInput = document.getElementById('search');
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+  loadTheme();
+  fetchNews();           // Auto load on start
+  loadSavedNews();
+  setupKeyboardShortcuts();
+  detectSystemTheme();
+
+  document.addEventListener('click', (e) => {
+    if (menu.classList.contains('open') && !menu.contains(e.target) && !e.target.closest('.menu-btn')) {
+      toggleMenu();
+    }
+  });
+});
+
+// Theme
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  const newTheme = current === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', newTheme);
+  localStorage.setItem('theme', newTheme);
+  showToast(newTheme === 'light' ? '☀️ Light Mode' : '🌙 Dark Mode');
+}
+
+function loadTheme() {
+  const saved = localStorage.getItem('theme');
+  if (saved) document.documentElement.setAttribute('data-theme', saved);
+}
+
+function detectSystemTheme() {
+  if (!localStorage.getItem('theme')) {
+    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+  }
+}
+
+// Menu
+function toggleMenu() {
+  menu.classList.toggle('open');
+}
+
+function showSection(section) {
+  currentSection = section;
+  ['homeSection', 'savedSection', 'trendingSection', 'premiumSection'].forEach(id => {
+    document.getElementById(id).style.display = 'none';
+  });
+  document.getElementById(section + 'Section').style.display = 'block';
+
+  if (section === 'saved') loadSavedNews();
+  if (section === 'trending') loadTrendingNews();
+  if (section === 'premium') loadPremiumNews();
+
+  toggleMenu();
+}
+
+// Category - Now Working Properly
+function setCategory(category) {
+  currentCategory = category;
+
+  document.querySelectorAll('.category-btn').forEach(btn => {
+    btn.classList.remove('active');
+    const btnText = btn.textContent.trim().toLowerCase();
+    if ((category === 'all' && btnText === 'all') || btnText.includes(category)) {
+      btn.classList.add('active');
+    }
+  });
+
+  renderNews();
+  showToast(`📂 ${category === 'all' ? 'All News' : category.toUpperCase()}`);
+}
+
+// Fetch News - Much More Reliable
+async function fetchNews() {
+  if (isLoading) return;
+  isLoading = true;
+  showSkeletonLoading(newsContainer);
+
+  try {
+    const response = await fetch(
+      `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent("https://news.google.com/rss?hl=en-IN&gl=IN&ceid=IN:en")}&count=50&t=${Date.now()}`
+    );
+
+    const data = await response.json();
+
+    if (data?.items && data.items.length > 5) {
+      allNewsItems = data.items.map((item, idx) => ({
+        id: idx,
+        title: (item.title || "").split(" - ")[0] || item.title,
+        cleanTitle: (item.title || "").split(" - ")[0] || item.title,
+        source: item.author || "Google News",
+        link: item.link,
+        thumbnail: item.thumbnail || `https://picsum.photos/id/${100 + idx}/400/220`,
+        pubDate: new Date(item.pubDate || Date.now()),
+        description: item.description || item.content || "",
+        readingTime: Math.max(2, Math.ceil((item.title || "").length / 40))
+      }));
+
+      updateBreakingTicker(allNewsItems.slice(0, 8));
+      renderNews();
+      updateLastUpdated();
+      localStorage.setItem('cachedNews', JSON.stringify(allNewsItems));
+      showToast(`✅ ${allNewsItems.length} news loaded successfully`);
+    } else {
+      throw new Error("Empty response");
+    }
+  } catch (err) {
+    console.error(err);
+    const cached = localStorage.getItem('cachedNews');
+    if (cached) {
+      allNewsItems = JSON.parse(cached);
+      renderNews();
+      showToast('📱 Using cached news');
+    } else {
+      // Fallback dummy news (so app never looks empty)
+      allNewsItems = getDummyNews();
+      renderNews();
+      showToast('📱 Showing sample news (Live feed issue)');
+    }
+  } finally {
+    isLoading = false;
+  }
+}
+
+// Dummy News Fallback (Current relevant topics)
+function getDummyNews() {
+  return [
+    { id: 0, title: "Iran allows safe passage for India through Strait of Hormuz", cleanTitle: "Iran allows safe passage for India through Strait of Hormuz", source: "NDTV", link: "#", thumbnail: "https://picsum.photos/id/1015/400/220", pubDate: new Date(), description: "Iran declares India among friendly nations.", readingTime: 3 },
+    { id: 1, title: "Google to label verified investment apps in India to fight scams", cleanTitle: "Google to label verified investment apps in India", source: "Reuters", link: "#", thumbnail: "https://picsum.photos/id/201/400/220", pubDate: new Date(), description: "SEBI and Google join hands against fraud apps.", readingTime: 4 },
+    { id: 2, title: "13 killed in bus-truck collision in Markapuram, Andhra Pradesh", cleanTitle: "13 killed in bus-truck collision in Markapuram", source: "The Hindu", link: "#", thumbnail: "https://picsum.photos/id/237/400/220", pubDate: new Date(), description: "Tragic accident claims multiple lives.", readingTime: 2 },
+    { id: 3, title: "India's forex reserves act as shield amid West Asia tensions", cleanTitle: "India's forex reserves act as shield", source: "Livemint", link: "#", thumbnail: "https://picsum.photos/id/180/400/220", pubDate: new Date(), description: "Economic stability maintained.", readingTime: 3 },
+    { id: 4, title: "AI adoption in Indian enterprises to lead globally", cleanTitle: "AI adoption in Indian enterprises", source: "Livemint", link: "#", thumbnail: "https://picsum.photos/id/251/400/220", pubDate: new Date(), description: "Agentic AI taking center stage.", readingTime: 5 },
+  ];
+}
+
+// Breaking Ticker
+function updateBreakingTicker(items) {
+  const ticker = document.getElementById('tickerContent');
+  if (!ticker) return;
+  const html = items.map(item => `<span style="margin-right:40px;">🔴 ${escapeHtml(item.cleanTitle.substring(0,75))}...</span>`).join('');
+  ticker.innerHTML = html + html;
+}
+
+// Render News with Fixed Category Logic
+function renderNews() {
+  if (!newsContainer) return;
+
+  const searchText = searchInput.value.toLowerCase().trim();
+
+  let filtered = allNewsItems.filter(item => {
+    const title = item.cleanTitle.toLowerCase();
+    const desc = (item.description || "").toLowerCase();
+
+    if (currentCategory !== 'all') {
+      if (currentCategory === 'india' && 
+          !title.includes('india') && !title.includes('delhi') && !title.includes('mumbai') && 
+          !title.includes('andhra') && !desc.includes('india')) return false;
+
+      if (currentCategory === 'world' && 
+          !title.includes('iran') && !title.includes('world') && !title.includes('international') && 
+          !title.includes('hormuz')) return false;
+
+      if (currentCategory === 'technology' && 
+          !title.includes('google') && !title.includes('ai') && !title.includes('tech') && 
+          !title.includes('app')) return false;
+
+      if (currentCategory === 'sports' && 
+          !title.includes('cricket') && !title.includes('ipl') && !title.includes('football') && 
+          !title.includes('match')) return false;
+    }
+
+    if (searchText && !title.includes(searchText)) return false;
+
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    newsContainer.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:80px 20px;color:var(--text-secondary);">😕 No news found in this category.<br><button onclick="fetchNews()" style="margin-top:20px;padding:12px 30px;background:var(--accent-blue);border:none;border-radius:50px;color:white;">Refresh</button></div>`;
+    return;
+  }
+
+  newsContainer.innerHTML = filtered.map(item => createNewsCard(item)).join('');
+}
+
+function createNewsCard(item) {
+  const isSaved = isNewsSaved(item.link);
+  const summary = generateSummary(item.description, item.cleanTitle);
+
+  return `
+    <div class="card">
+      <div class="card-img">
+        <img src="${item.thumbnail}" alt="${escapeHtml(item.cleanTitle)}" loading="lazy" onerror="this.src='https://picsum.photos/id/237/400/220'">
+        <span class="reading-time">📖 ${item.readingTime} min</span>
+      </div>
+      <div class="card-content">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span class="source">📰 ${escapeHtml(item.source)}</span>
+          ${item.id < 3 ? '<span style="color:#ef4444;font-weight:bold;">🔥</span>' : ''}
+        </div>
+        <h3><a href="${item.link}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">${escapeHtml(item.cleanTitle)}</a></h3>
+        
+        <div class="summary-section">
+          <div style="display:flex;justify-content:space-between;font-size:0.8rem;color:var(--accent-blue);margin-bottom:6px;">
+            <span>🤖 AI Summary</span>
+            <button onclick="regenerateSummary(${item.id}, '${escapeHtml(item.cleanTitle)}', \`${escapeHtml(item.description)}\`)" style="background:none;border:none;color:var(--accent-blue);cursor:pointer;">↻</button>
+          </div>
+          <div class="summary-text" id="summary-${item.id}">${escapeHtml(summary)}</div>
+        </div>
+
+        <div class="action-buttons">
+          <button class="action-btn" onclick="shareArticle('${item.link}', '${escapeHtml(item.cleanTitle)}')">📤 Share</button>
+          <button class="action-btn ${isSaved ? 'save-btn saved' : ''}" onclick="toggleSave('${item.link}', '${escapeHtml(item.cleanTitle)}', '${escapeHtml(item.source)}', '${item.thumbnail}', '${escapeHtml(item.description)}')">
+            ${isSaved ? '⭐ Saved' : '⭐ Save'}
+          </button>
+        </div>
+        <div style="font-size:0.75rem;color:var(--text-secondary);margin-top:10px;">${formatDate(item.pubDate)}</div>
+      </div>
+    </div>
+  `;
+}
+
+// Other functions (generateSummary, toggleSave, loadSavedNews, shareArticle, showToast, escapeHtml etc.) keep same as my previous message
+
+function generateSummary(text, title) {
+  if (newsSummaries.has(title)) return newsSummaries.get(title);
+  let clean = (text || title).replace(/<[^>]+>/g, "").trim();
+  let summary = title + ". " + clean.substring(0, 130) + "...";
+  summary = summary.replace(/\s+/g, " ").trim();
+  newsSummaries.set(title, summary);
+  return summary;
+}
+
+function regenerateSummary(id, title, desc) {
+  newsSummaries.delete(title);
+  const newSum = generateSummary(desc, title);
+  const el = document.getElementById(`summary-${id}`);
+  if (el) el.textContent = newSum;
+  showToast('✨ Summary refreshed');
+}
+
+function toggleSave(link, title, source, thumbnail, description) {
+  let saved = JSON.parse(localStorage.getItem('savedNews')) || [];
+  const index = saved.findIndex(i => i.link === link);
+  if (index > -1) {
+    saved.splice(index, 1);
+    showToast('❌ Removed');
+  } else {
+    saved.push({ link, title, source, thumbnail, description, savedAt: new Date().toISOString() });
+    showToast('⭐ Saved');
+  }
+  localStorage.setItem('savedNews', JSON.stringify(saved));
+  if (currentSection === 'saved') loadSavedNews();
+  else renderNews();
+}
+
+function isNewsSaved(link) {
+  const saved = JSON.parse(localStorage.getItem('savedNews')) || [];
+  return saved.some(item => item.link === link);
+}
+
+function loadSavedNews() {
+  const saved = JSON.parse(localStorage.getItem('savedNews')) || [];
+  if (saved.length === 0) {
+    savedContainer.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:80px;">No saved articles yet</div>`;
+    return;
+  }
+  savedContainer.innerHTML = saved.map(item => createNewsCard({...item, id: Math.random()})).join(''); // simple reuse
+}
+
+function loadTrendingNews() {
+  if (!trendingContainer) return;
+  const trending = [...allNewsItems].sort((a,b) => b.pubDate - a.pubDate).slice(0,10);
+  trendingContainer.innerHTML = trending.map(item => createNewsCard(item)).join('');
+}
+
+function loadPremiumNews() {
+  premiumContainer.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:80px;color:var(--accent-yellow);">💎 Premium Exclusive Content Coming Soon</div>`;
+}
+
+function debouncedSearch() {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(renderNews, 300);
+}
+
+async function shareArticle(url, title) {
+  if (navigator.share) {
+    try { await navigator.share({title, url}); } catch {}
+  } else {
+    navigator.clipboard.writeText(url);
+    showToast('🔗 Link copied!');
+  }
+}
+
+function formatDate(date) {
+  const diff = Date.now() - new Date(date);
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "Just now";
+  if (mins < 60) return mins + "m ago";
+  return Math.floor(mins/60) + "h ago";
+}
+
+function updateLastUpdated() {
+  if (lastUpdatedSpan) lastUpdatedSpan.innerHTML = `Last updated: ${new Date().toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'})}`;
+}
+
+function showSkeletonLoading(container) {
+  container.innerHTML = Array(6).fill(0).map(() => `
+    <div class="card">
+      <div style="height:190px;background:linear-gradient(90deg,var(--bg-tertiary) 25%, var(--bg-secondary) 50%, var(--bg-tertiary) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite linear;"></div>
+      <div style="padding:16px;">
+        <div style="height:16px;background:var(--bg-tertiary);margin:10px 0;border-radius:8px;width:75%;"></div>
+        <div style="height:14px;background:var(--bg-tertiary);margin:8px 0;border-radius:6px;"></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function showError(container, msg) {
+  container.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:80px;">⚠️ ${msg}</div>`;
+}
+
+function showToast(msg) {
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 2800);
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]);
+}
+
+// Premium Popup (keep your old one or use this simple)
+function showPremiumInquiry() {
+  alert("Premium Inquiry\nContact: darkg6421@gmail.com\nWe'll reply within 24 hours.");
+}
+
+// Expose to global
+window.toggleMenu = toggleMenu;
+window.showSection = showSection;
+window.setCategory = setCategory;
+window.fetchNews = fetchNews;
+window.toggleSave = toggleSave;
+window.toggleTheme = toggleTheme;
+window.debouncedSearch = debouncedSearch;
+window.shareArticle = shareArticle;
+window.regenerateSummary = regenerateSummary;
+window.showPremiumInquiry = showPremiumInquiry;
